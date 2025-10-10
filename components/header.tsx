@@ -1,46 +1,43 @@
+'use client'
+
 import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/nextjs'
-import { auth } from '@clerk/nextjs/server'
-import { eq } from 'drizzle-orm'
-import { CommandIcon } from 'lucide-react'
+import { CommandIcon, MenuIcon, XIcon } from 'lucide-react'
 import Link from 'next/link'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { db } from '@/db'
-import { userProfiles } from '@/db/schema/user-profiles'
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet'
+import { useIsMobile } from '@/hooks/use-mobile'
 
-async function AdminLink() {
-  const { userId } = await auth()
-
-  if (!userId) {
-    return null
-  }
-
-  const profile = await db.query.userProfiles.findFirst({
-    where: eq(userProfiles.userId, userId),
-  })
-
-  if (profile?.role !== 'admin') {
-    return null
-  }
-
-  return (
-    <Button asChild variant="ghost">
-      <Link href="/admin/commands">Admin</Link>
-    </Button>
-  )
+type HeaderProps = {
+  isAdmin?: boolean
 }
 
-export function Header() {
+export function Header({ isAdmin = false }: HeaderProps) {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const isMobile = useIsMobile()
+
   return (
-    <header className="border-b">
+    <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex items-center justify-between px-4 py-4">
         <Link
           className="flex items-center gap-2 transition-opacity hover:opacity-80"
           href="/"
         >
           <CommandIcon className="h-6 w-6" />
-          <h1 className="font-bold text-xl">Cursor Commands Explorer</h1>
+          <h1 className="font-bold text-lg sm:text-xl">
+            <span className="hidden sm:inline">Cursor Commands Explorer</span>
+            <span className="sm:hidden">Commands</span>
+          </h1>
         </Link>
-        <nav className="flex items-center gap-2">
+
+        {/* Desktop Navigation */}
+        <nav className="hidden items-center gap-2 md:flex">
           <Button asChild variant="ghost">
             <Link href="/commands">Browse</Link>
           </Button>
@@ -55,7 +52,11 @@ export function Header() {
               <Link href="/submissions">My Submissions</Link>
             </Button>
           </SignedIn>
-          <AdminLink />
+          {isAdmin && (
+            <Button asChild variant="ghost">
+              <Link href="/admin/commands">Admin</Link>
+            </Button>
+          )}
           <SignedOut>
             <SignInButton mode="modal">
               <Button variant="outline">Sign In</Button>
@@ -72,6 +73,90 @@ export function Header() {
             />
           </SignedIn>
         </nav>
+
+        {/* Mobile Navigation */}
+        <div className="flex items-center gap-2 md:hidden">
+          <SignedIn>
+            <UserButton
+              afterSignOutUrl="/"
+              appearance={{
+                elements: {
+                  avatarBox: 'h-9 w-9',
+                },
+              }}
+            />
+          </SignedIn>
+          <Sheet onOpenChange={setMobileMenuOpen} open={mobileMenuOpen}>
+            <SheetTrigger asChild>
+              <Button size="icon" variant="ghost">
+                {mobileMenuOpen ? (
+                  <XIcon className="h-5 w-5" />
+                ) : (
+                  <MenuIcon className="h-5 w-5" />
+                )}
+                <span className="sr-only">Toggle menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right">
+              <SheetHeader>
+                <SheetTitle>Menu</SheetTitle>
+              </SheetHeader>
+              <nav className="mt-6 flex flex-col gap-2">
+                <Button
+                  asChild
+                  className="justify-start"
+                  onClick={() => setMobileMenuOpen(false)}
+                  variant="ghost"
+                >
+                  <Link href="/commands">Browse Commands</Link>
+                </Button>
+                <SignedIn>
+                  <Button
+                    asChild
+                    className="justify-start"
+                    onClick={() => setMobileMenuOpen(false)}
+                    variant="ghost"
+                  >
+                    <Link href="/favorites">Favorites</Link>
+                  </Button>
+                  <Button
+                    asChild
+                    className="justify-start"
+                    onClick={() => setMobileMenuOpen(false)}
+                    variant="ghost"
+                  >
+                    <Link href="/commands/new">Submit Command</Link>
+                  </Button>
+                  <Button
+                    asChild
+                    className="justify-start"
+                    onClick={() => setMobileMenuOpen(false)}
+                    variant="ghost"
+                  >
+                    <Link href="/submissions">My Submissions</Link>
+                  </Button>
+                </SignedIn>
+                {isAdmin && (
+                  <Button
+                    asChild
+                    className="justify-start"
+                    onClick={() => setMobileMenuOpen(false)}
+                    variant="ghost"
+                  >
+                    <Link href="/admin/commands">Admin Panel</Link>
+                  </Button>
+                )}
+                <SignedOut>
+                  <SignInButton mode="modal">
+                    <Button className="justify-start" variant="outline">
+                      Sign In
+                    </Button>
+                  </SignInButton>
+                </SignedOut>
+              </nav>
+            </SheetContent>
+          </Sheet>
+        </div>
       </div>
     </header>
   )

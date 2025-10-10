@@ -107,29 +107,31 @@ export default async function CommandDetailPage({ params }: PageProps) {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <main className="container mx-auto flex-1 px-4 py-8">
-        <div className="mx-auto max-w-4xl space-y-8">
+      <main className="container mx-auto flex-1 px-4 py-6 sm:py-8">
+        <div className="mx-auto max-w-4xl space-y-6 sm:space-y-8">
           {/* Breadcrumb */}
-          <div className="text-muted-foreground text-sm">
+          <div className="text-muted-foreground text-xs sm:text-sm">
             <Link className="hover:text-foreground" href="/commands">
               Commands
             </Link>
             {' / '}
-            <span className="text-foreground">{commandWithBookmark.title}</span>
+            <span className="truncate text-foreground">{commandWithBookmark.title}</span>
           </div>
 
           {/* Main Content */}
           <div className="space-y-6">
-            <div className="flex items-start justify-between gap-4">
+            <div className="space-y-4">
               <div>
-                <h1 className="mb-4 font-bold text-4xl">{commandWithBookmark.title}</h1>
+                <h1 className="mb-3 font-bold text-2xl leading-tight sm:mb-4 sm:text-3xl md:text-4xl">
+                  {commandWithBookmark.title}
+                </h1>
                 {commandWithBookmark.description && (
-                  <p className="text-muted-foreground text-xl">
+                  <p className="text-base text-muted-foreground sm:text-lg md:text-xl">
                     {commandWithBookmark.description}
                   </p>
                 )}
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-col gap-2 sm:flex-row sm:gap-2">
                 <BookmarkButton
                   commandId={commandWithBookmark.id}
                   initialBookmarked={commandWithBookmark.isBookmarked}
@@ -156,16 +158,16 @@ export default async function CommandDetailPage({ params }: PageProps) {
             </Card>
 
             {/* Metadata */}
-            <div className="flex flex-wrap items-center gap-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
               {commandWithBookmark.category && (
                 <div className="flex items-center gap-2">
-                  <span className="font-medium text-sm">Category:</span>
+                  <span className="font-medium text-xs sm:text-sm">Category:</span>
                   <Badge variant="secondary">{commandWithBookmark.category.name}</Badge>
                 </div>
               )}
               {commandWithBookmark.tags && commandWithBookmark.tags.length > 0 && (
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="font-medium text-sm">Tags:</span>
+                  <span className="font-medium text-xs sm:text-sm">Tags:</span>
                   {commandWithBookmark.tags.map(
                     (tagRel: { tag: { name: string; slug: string } }) => (
                       <Badge key={tagRel.tag.slug} variant="outline">
@@ -179,9 +181,10 @@ export default async function CommandDetailPage({ params }: PageProps) {
 
             {/* Actions */}
             <div className="flex gap-2">
-              <Button className="flex-1" variant="outline">
+              <Button className="flex-1" size="sm" variant="outline">
                 <FlagIcon className="mr-2 h-4 w-4" />
-                Report Issue
+                <span className="hidden sm:inline">Report Issue</span>
+                <span className="sm:hidden">Report</span>
               </Button>
             </div>
 
@@ -190,8 +193,8 @@ export default async function CommandDetailPage({ params }: PageProps) {
               <>
                 <Separator />
                 <div className="space-y-4">
-                  <h2 className="font-bold text-2xl">Related Commands</h2>
-                  <div className="grid gap-4 md:grid-cols-2">
+                  <h2 className="font-bold text-xl sm:text-2xl">Related Commands</h2>
+                  <div className="grid gap-3 sm:gap-4 sm:grid-cols-2">
                     {related
                       .slice(0, MAX_RELATED_COMMANDS)
                       .map((cmd) => (
