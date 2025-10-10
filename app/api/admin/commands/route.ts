@@ -4,20 +4,8 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { db } from '@/db'
 import { commands } from '@/db/schema/commands'
-import { userProfiles } from '@/db/schema/user-profiles'
+import { checkAdminAccess } from '@/lib/auth'
 import { logger } from '@/lib/logger'
-
-async function checkAdminAccess(userId: string | null): Promise<boolean> {
-  if (!userId) {
-    return false
-  }
-
-  const profile = await db.query.userProfiles.findFirst({
-    where: eq(userProfiles.userId, userId),
-  })
-
-  return profile?.role === 'admin'
-}
 
 export async function GET(request: NextRequest) {
   try {
