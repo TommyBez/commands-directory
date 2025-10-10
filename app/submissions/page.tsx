@@ -1,9 +1,12 @@
 import { auth } from '@clerk/nextjs/server'
+import { eq } from 'drizzle-orm'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { db } from '@/db'
+import { commands } from '@/db/schema/commands'
 import type { Command } from '@/db/schema/commands'
 
 type CommandWithRelations = Command & {
@@ -25,20 +28,18 @@ export default async function SubmissionsPage() {
     redirect('/sign-in')
   }
 
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/api/user/commands`,
-    {
-      cache: 'no-store',
+  const userCommands = await db.query.commands.findMany({
+    where: eq(commands.submittedByUserId, userId),
+    with: {
+      category: true,
+      tags: {
+        with: {
+          tag: true,
+        },
+      },
     },
-  )
-
-  if (!response.ok) {
-    throw new Error('Failed to fetch user commands')
-  }
-
-  const { data: commands } = (await response.json()) as {
-    data: CommandWithRelations[]
-  }
+    orderBy: (table, { desc }) => [desc(table.createdAt)],
+  })
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -69,7 +70,7 @@ export default async function SubmissionsPage() {
             </Button>
           </div>
 
-          {commands.length === 0 ? (
+          {userCommands.length === 0 ? (
             <Card>
               <CardContent className="py-12 text-center">
                 <p className="mb-4 text-muted-foreground">
@@ -82,7 +83,7 @@ export default async function SubmissionsPage() {
             </Card>
           ) : (
             <div className="space-y-4">
-              {commands.map((command) => (
+              {userCommands.map((command) => (
                 <Card key={command.id}>
                   <CardHeader>
                     <div className="flex items-start justify-between gap-4">

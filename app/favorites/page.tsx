@@ -1,9 +1,11 @@
 import { auth } from '@clerk/nextjs/server'
-import { cookies } from 'next/headers'
+import { eq } from 'drizzle-orm'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { CommandCard } from '@/components/command-card'
 import { Button } from '@/components/ui/button'
+import { db } from '@/db'
+import { bookmarks } from '@/db/schema/bookmarks'
 
 export default async function FavoritesPage() {
   const { userId } = await auth()
@@ -11,19 +13,23 @@ export default async function FavoritesPage() {
   if (!userId) {
     redirect('/sign-in?redirect_url=/favorites')
   }
-  const cookieStore = await cookies()
 
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/bookmarks`,
-    {
-      headers: {
-        Cookie: cookieStore.toString(),
+  const userBookmarks = await db.query.bookmarks.findMany({
+    where: eq(bookmarks.userId, userId),
+    with: {
+      command: {
+        with: {
+          category: true,
+          tags: {
+            with: {
+              tag: true,
+            },
+          },
+        },
       },
-      cache: 'no-store',
     },
-  )
-
-  const { data: bookmarks } = await response.json()
+    orderBy: (table, { desc }) => [desc(table.createdAt)],
+  })
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -36,7 +42,7 @@ export default async function FavoritesPage() {
             </p>
           </div>
 
-          {bookmarks.length === 0 ? (
+          {userBookmarks.length === 0 ? (
             <div className="py-12 text-center">
               <p className="mb-4 text-muted-foreground">
                 You haven't bookmarked any commands yet.
@@ -47,15 +53,11 @@ export default async function FavoritesPage() {
             </div>
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {bookmarks.map((bookmark: Record<string, never>) => (
+              {userBookmarks.map((bookmark) => (
                 <CommandCard
-                  command={
-                    bookmark.command as Parameters<
-                      typeof CommandCard
-                    >[0]['command']
-                  }
+                  command={bookmark.command}
                   isBookmarked={true}
-                  key={(bookmark.command as { id: string }).id}
+                  key={bookmark.command.id}
                 />
               ))}
             </div>

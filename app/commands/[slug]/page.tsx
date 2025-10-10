@@ -1,3 +1,5 @@
+import { auth } from '@clerk/nextjs/server'
+import { and, eq } from 'drizzle-orm'
 import { FlagIcon } from 'lucide-react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -8,6 +10,10 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
+import { db } from '@/db'
+import { bookmarks } from '@/db/schema/bookmarks'
+import { commands } from '@/db/schema/commands'
+import { userProfiles } from '@/db/schema/user-profiles'
 
 const MAX_RELATED_COMMANDS = 4
 
@@ -17,17 +23,87 @@ type PageProps = {
 
 export default async function CommandDetailPage({ params }: PageProps) {
   const { slug } = await params
+  const { userId } = await auth()
 
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/commands/${slug}`,
-    { cache: 'no-store' },
-  )
+  // Fetch main command
+  const command = await db.query.commands.findFirst({
+    where: eq(commands.slug, slug),
+    with: {
+      category: true,
+      tags: {
+        with: {
+          tag: true,
+        },
+      },
+    },
+  })
 
-  if (!response.ok) {
+  if (!command) {
     notFound()
   }
 
-  const { data: command, related } = await response.json()
+  // Check visibility: approved OR (user is owner OR admin)
+  const isApproved = command.status === 'approved'
+
+  let canView = isApproved
+  if (!canView && userId) {
+    const isOwner = command.submittedByUserId === userId
+    if (isOwner) {
+      canView = true
+    } else {
+      const profile = await db.query.userProfiles.findFirst({
+        where: eq(userProfiles.userId, userId),
+      })
+      canView = profile?.role === 'admin'
+    }
+  }
+
+  if (!canView) {
+    notFound()
+  }
+
+  // Find related commands (same category, only approved)
+  const relatedCommands = command.categoryId
+    ? await db.query.commands.findMany({
+        where: and(
+          eq(commands.categoryId, command.categoryId),
+          eq(commands.status, 'approved'),
+        ),
+        limit: 5,
+        with: {
+          category: true,
+          tags: {
+            with: {
+              tag: true,
+            },
+          },
+        },
+      })
+    : []
+
+  // Filter out the current command
+  const relatedFiltered = relatedCommands.filter((c) => c.id !== command.id)
+
+  // Get bookmarked command IDs if user is authenticated
+  let bookmarkedCommandIds: string[] = []
+  if (userId) {
+    const userBookmarks = await db
+      .select({ commandId: bookmarks.commandId })
+      .from(bookmarks)
+      .where(eq(bookmarks.userId, userId))
+    bookmarkedCommandIds = userBookmarks.map((b) => b.commandId)
+  }
+
+  // Add isBookmarked flag to command and related commands
+  const commandWithBookmark = {
+    ...command,
+    isBookmarked: bookmarkedCommandIds.includes(command.id),
+  }
+
+  const related = relatedFiltered.map((cmd) => ({
+    ...cmd,
+    isBookmarked: bookmarkedCommandIds.includes(cmd.id),
+  }))
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -39,29 +115,29 @@ export default async function CommandDetailPage({ params }: PageProps) {
               Commands
             </Link>
             {' / '}
-            <span className="text-foreground">{command.title}</span>
+            <span className="text-foreground">{commandWithBookmark.title}</span>
           </div>
 
           {/* Main Content */}
           <div className="space-y-6">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h1 className="mb-4 font-bold text-4xl">{command.title}</h1>
-                {command.description && (
+                <h1 className="mb-4 font-bold text-4xl">{commandWithBookmark.title}</h1>
+                {commandWithBookmark.description && (
                   <p className="text-muted-foreground text-xl">
-                    {command.description}
+                    {commandWithBookmark.description}
                   </p>
                 )}
               </div>
               <div className="flex gap-2">
                 <BookmarkButton
-                  commandId={command.id}
-                  initialBookmarked={command.isBookmarked}
+                  commandId={commandWithBookmark.id}
+                  initialBookmarked={commandWithBookmark.isBookmarked}
                   showText={true}
                   size="default"
                   variant="outline"
                 />
-                <CopyCommandButton content={command.content} />
+                <CopyCommandButton content={commandWithBookmark.content} />
               </div>
             </div>
 
@@ -73,7 +149,7 @@ export default async function CommandDetailPage({ params }: PageProps) {
               <CardContent>
                 <div className="prose prose-slate dark:prose-invert max-w-none">
                   <pre className="overflow-x-auto whitespace-pre-wrap rounded-md bg-muted p-4">
-                    {command.content}
+                    {commandWithBookmark.content}
                   </pre>
                 </div>
               </CardContent>
@@ -81,16 +157,16 @@ export default async function CommandDetailPage({ params }: PageProps) {
 
             {/* Metadata */}
             <div className="flex flex-wrap items-center gap-4">
-              {command.category && (
+              {commandWithBookmark.category && (
                 <div className="flex items-center gap-2">
                   <span className="font-medium text-sm">Category:</span>
-                  <Badge variant="secondary">{command.category.name}</Badge>
+                  <Badge variant="secondary">{commandWithBookmark.category.name}</Badge>
                 </div>
               )}
-              {command.tags && command.tags.length > 0 && (
+              {commandWithBookmark.tags && commandWithBookmark.tags.length > 0 && (
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="font-medium text-sm">Tags:</span>
-                  {command.tags.map(
+                  {commandWithBookmark.tags.map(
                     (tagRel: { tag: { name: string; slug: string } }) => (
                       <Badge key={tagRel.tag.slug} variant="outline">
                         {tagRel.tag.name}
@@ -118,7 +194,7 @@ export default async function CommandDetailPage({ params }: PageProps) {
                   <div className="grid gap-4 md:grid-cols-2">
                     {related
                       .slice(0, MAX_RELATED_COMMANDS)
-                      .map((cmd: typeof command) => (
+                      .map((cmd) => (
                         <CommandCard
                           command={cmd}
                           isBookmarked={cmd.isBookmarked}

@@ -1,8 +1,15 @@
+import { auth } from '@clerk/nextjs/server'
+import { and, eq, ilike, inArray, or, sql, type SQL } from 'drizzle-orm'
 import Link from 'next/link'
 import { CommandCard } from '@/components/command-card'
 import { CommandFilters } from '@/components/command-filters'
 import { SearchBar } from '@/components/search-bar'
 import { Button } from '@/components/ui/button'
+import { db } from '@/db'
+import { bookmarks } from '@/db/schema/bookmarks'
+import { categories } from '@/db/schema/categories'
+import { commandTagMap, commandTags } from '@/db/schema/command-tags'
+import { commands } from '@/db/schema/commands'
 import type { Command } from '@/db/schema/commands'
 
 type PageProps = {
@@ -22,26 +29,110 @@ type CommandWithRelations = Command & {
 
 export default async function CommandsPage({ searchParams }: PageProps) {
   const params = await searchParams
-  const queryString = new URLSearchParams(
-    Object.entries(params).reduce(
-      (acc, [key, value]) => {
-        if (value) {
-          acc[key] = value
-        }
-        return acc
+  const { userId } = await auth()
+
+  // Parse query params
+  const q = params.q
+  const category = params.category
+  const tag = params.tag
+  const page = Number.parseInt(params.page || '1', 10)
+  const limit = 20
+  const offset = (page - 1) * limit
+
+  // Build where conditions
+  const conditions: SQL<unknown>[] = []
+  conditions.push(eq(commands.status, 'approved'))
+
+  // Text search
+  if (q) {
+    const searchCondition = or(
+      ilike(commands.title, `%${q}%`),
+      ilike(commands.description, `%${q}%`),
+      ilike(commands.content, `%${q}%`),
+    )
+    if (searchCondition) {
+      conditions.push(searchCondition)
+    }
+  }
+
+  // Category filter
+  if (category) {
+    const cat = await db.query.categories.findFirst({
+      where: eq(categories.slug, category),
+    })
+    if (cat) {
+      conditions.push(eq(commands.categoryId, cat.id))
+    }
+  }
+
+  // Tag filter
+  if (tag) {
+    const tagRecord = await db.query.commandTags.findFirst({
+      where: eq(commandTags.slug, tag),
+    })
+    if (tagRecord) {
+      const commandIds = await db
+        .select({ commandId: commandTagMap.commandId })
+        .from(commandTagMap)
+        .where(eq(commandTagMap.tagId, tagRecord.id))
+
+      if (commandIds.length > 0) {
+        conditions.push(
+          inArray(
+            commands.id,
+            commandIds.map((c) => c.commandId),
+          ),
+        )
+      }
+    }
+  }
+
+  const whereClause = conditions.length > 0 ? and(...conditions) : undefined
+
+  // Execute queries
+  const [results, totalCount] = await Promise.all([
+    db.query.commands.findMany({
+      where: whereClause,
+      limit,
+      offset,
+      with: {
+        category: true,
+        tags: {
+          with: {
+            tag: true,
+          },
+        },
       },
-      {} as Record<string, string>,
-    ),
-  ).toString()
+      orderBy: (table, { desc }) => [desc(table.createdAt)],
+    }),
+    db
+      .select({ count: sql<number>`count(*)` })
+      .from(commands)
+      .where(whereClause)
+      .then((res) => Number(res[0]?.count || 0)),
+  ])
 
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/api/commands?${queryString}`,
-    { cache: 'no-store' },
-  )
+  // Get bookmarks
+  let bookmarkedCommandIds: string[] = []
+  if (userId) {
+    const userBookmarks = await db
+      .select({ commandId: bookmarks.commandId })
+      .from(bookmarks)
+      .where(eq(bookmarks.userId, userId))
+    bookmarkedCommandIds = userBookmarks.map((b) => b.commandId)
+  }
 
-  const { data: commands, pagination } = (await response.json()) as {
-    data: CommandWithRelations[]
-    pagination: { total: number; page: number; totalPages: number }
+  // Add isBookmarked flag
+  const commandsWithBookmarks = results.map((command) => ({
+    ...command,
+    isBookmarked: bookmarkedCommandIds.includes(command.id),
+  }))
+
+  // Build pagination
+  const pagination = {
+    page,
+    total: totalCount,
+    totalPages: Math.ceil(totalCount / limit),
   }
 
   return (
@@ -69,7 +160,7 @@ export default async function CommandsPage({ searchParams }: PageProps) {
               </p>
             </div>
 
-            {commands.length === 0 ? (
+            {commandsWithBookmarks.length === 0 ? (
               <div className="py-12 text-center">
                 <p className="text-muted-foreground">
                   No commands found. Try adjusting your filters.
@@ -77,7 +168,7 @@ export default async function CommandsPage({ searchParams }: PageProps) {
               </div>
             ) : (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {commands.map((command) => (
+                {commandsWithBookmarks.map((command) => (
                   <CommandCard
                     command={command}
                     isBookmarked={command.isBookmarked}
