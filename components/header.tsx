@@ -1,16 +1,11 @@
-import {
-  SignedIn,
-  SignedOut,
-  SignInButton,
-  UserButton,
-} from '@clerk/nextjs'
+import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/nextjs'
+import { auth } from '@clerk/nextjs/server'
 import { eq } from 'drizzle-orm'
 import { CommandIcon } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { db } from '@/db'
 import { userProfiles } from '@/db/schema/user-profiles'
-import { auth } from '@clerk/nextjs/server'
 
 async function AdminLink() {
   const { userId } = await auth()
