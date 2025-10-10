@@ -37,6 +37,10 @@ export default async function SubmissionsPage() {
     },
   )
 
+  if (!response.ok) {
+    throw new Error('Failed to fetch user commands')
+  }
+
   const { data: commands } = (await response.json()) as {
     data: CommandWithRelations[]
   }
