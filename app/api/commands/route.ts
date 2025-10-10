@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto'
 import { auth } from '@clerk/nextjs/server'
 import { and, eq, ilike, inArray, or, type SQL, sql } from 'drizzle-orm'
 import type { NextRequest } from 'next/server'
@@ -141,7 +142,8 @@ async function generateUniqueSlug(baseTitle: string): Promise<string> {
     if (!existing) {
       return slug
     }
-    slug = `${generateSlug(baseTitle)}-${counter}`
+    // Add some randomness to handle race conditions better
+    slug = `${generateSlug(baseTitle)}-${counter}-${randomUUID().slice(0, SLUG_RANDOM_SUFFIX_LENGTH)}`
     counter++
   }
 }
@@ -190,6 +192,94 @@ export async function GET(request: NextRequest) {
 const MAX_TITLE_LENGTH = 200
 const MAX_DESCRIPTION_LENGTH = 500
 const MAX_CONTENT_LENGTH = 10_000
+const SLUG_RANDOM_SUFFIX_LENGTH = 4
+const MAX_INSERT_RETRIES = 3
+
+function validateCommandInputs(
+  tTitle: string,
+  tDescription: string | null,
+  tContent: string,
+) {
+  if (!tTitle || tTitle.length === 0) {
+    return NextResponse.json({ error: 'Title is required' }, { status: 400 })
+  }
+
+  if (!tContent || tContent.length === 0) {
+    return NextResponse.json({ error: 'Content is required' }, { status: 400 })
+  }
+
+  if (tTitle.length > MAX_TITLE_LENGTH) {
+    return NextResponse.json(
+      { error: `Title must be ${MAX_TITLE_LENGTH} characters or less` },
+      { status: 400 },
+    )
+  }
+
+  if (tDescription && tDescription.length > MAX_DESCRIPTION_LENGTH) {
+    return NextResponse.json(
+      {
+        error: `Description must be ${MAX_DESCRIPTION_LENGTH} characters or less`,
+      },
+      { status: 400 },
+    )
+  }
+
+  if (tContent.length > MAX_CONTENT_LENGTH) {
+    return NextResponse.json(
+      { error: `Content must be ${MAX_CONTENT_LENGTH} characters or less` },
+      { status: 400 },
+    )
+  }
+
+  return null
+}
+
+async function insertCommandWithRetry(params: {
+  userId: string
+  title: string
+  description: string | null
+  content: string
+  categoryId: string | null
+}) {
+  const { userId, title, description, content, categoryId } = params
+
+  for (let attempt = 1; attempt <= MAX_INSERT_RETRIES; attempt++) {
+    try {
+      const slug = await generateUniqueSlug(title)
+
+      const [insertedCommand] = await db
+        .insert(commands)
+        .values({
+          title,
+          description,
+          content,
+          categoryId: categoryId || null,
+          slug,
+          status: 'pending',
+          submittedByUserId: userId,
+        })
+        .returning()
+
+      return insertedCommand
+    } catch (e: unknown) {
+      const error = e as { code?: string; originalError?: { code?: string } }
+      const code = error?.code ?? error?.originalError?.code
+
+      if (code === '23505' && attempt < MAX_INSERT_RETRIES) {
+        logger.warn(`Slug conflict on attempt ${attempt}, retrying...`, {
+          code,
+          attempt,
+          title,
+        })
+        continue
+      }
+
+      throw e
+    }
+  }
+
+  return null
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -202,43 +292,31 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { title, description, content, categoryId } = body
 
-    // Validation
-    if (!title || typeof title !== 'string' || title.trim().length === 0) {
+    // Basic type validation
+    if (!title || typeof title !== 'string') {
       return NextResponse.json({ error: 'Title is required' }, { status: 400 })
     }
 
-    if (
-      !content ||
-      typeof content !== 'string' ||
-      content.trim().length === 0
-    ) {
+    if (!content || typeof content !== 'string') {
       return NextResponse.json(
         { error: 'Content is required' },
         { status: 400 },
       )
     }
 
-    if (title.length > MAX_TITLE_LENGTH) {
-      return NextResponse.json(
-        { error: `Title must be ${MAX_TITLE_LENGTH} characters or less` },
-        { status: 400 },
-      )
-    }
+    // Trim inputs
+    const tTitle = title.trim()
+    const tDescription = description?.trim() || null
+    const tContent = content.trim()
 
-    if (description && description.length > MAX_DESCRIPTION_LENGTH) {
-      return NextResponse.json(
-        {
-          error: `Description must be ${MAX_DESCRIPTION_LENGTH} characters or less`,
-        },
-        { status: 400 },
-      )
-    }
-
-    if (content.length > MAX_CONTENT_LENGTH) {
-      return NextResponse.json(
-        { error: `Content must be ${MAX_CONTENT_LENGTH} characters or less` },
-        { status: 400 },
-      )
+    // Validate trimmed inputs
+    const validationError = validateCommandInputs(
+      tTitle,
+      tDescription,
+      tContent,
+    )
+    if (validationError) {
+      return validationError
     }
 
     // Validate category if provided
@@ -251,22 +329,21 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Generate unique slug
-    const slug = await generateUniqueSlug(title)
+    // Insert command with retry logic
+    const newCommand = await insertCommandWithRetry({
+      userId,
+      title: tTitle,
+      description: tDescription,
+      content: tContent,
+      categoryId,
+    })
 
-    // Insert command with pending status
-    const [newCommand] = await db
-      .insert(commands)
-      .values({
-        title: title.trim(),
-        description: description?.trim() || null,
-        content: content.trim(),
-        categoryId: categoryId || null,
-        slug,
-        status: 'pending',
-        submittedByUserId: userId,
-      })
-      .returning()
+    if (!newCommand) {
+      return NextResponse.json(
+        { error: 'Slug conflict. Please retry.' },
+        { status: 409 },
+      )
+    }
 
     return NextResponse.json(
       { data: newCommand, message: 'Command submitted successfully' },

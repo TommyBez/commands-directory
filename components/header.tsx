@@ -54,8 +54,8 @@ export function Header() {
             <Button asChild variant="ghost">
               <Link href="/submissions">My Submissions</Link>
             </Button>
-            <AdminLink />
           </SignedIn>
+          <AdminLink />
           <SignedOut>
             <SignInButton mode="modal">
               <Button variant="outline">Sign In</Button>
