@@ -95,9 +95,9 @@ export function OnboardingModal() {
 					)}
 				</DialogFooter>
 				<div className="flex justify-center gap-2 mt-4">
-					{steps.map((_, i) => (
+					{steps.map((stepData, i) => (
 						<div
-							key={i}
+							key={stepData.title}
 							className={`h-1.5 w-8 rounded-full transition-colors ${
 								i === step ? "bg-primary" : "bg-muted"
 							}`}
