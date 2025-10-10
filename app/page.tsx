@@ -40,7 +40,7 @@ export default async function Home() {
                   <SearchBar />
                 </Suspense>
                 <p className="px-4 text-muted-foreground text-xs sm:text-sm">
-                  Try searching for commands like "React component" or "API integration"
+                  Try searching for commands like "code review" or "onboarding"
                 </p>
               </div>
             </div>
