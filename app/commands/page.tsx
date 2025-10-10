@@ -33,7 +33,7 @@ export default async function CommandsPage({ searchParams }: PageProps) {
   ).toString();
 
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"}/api/commands?${queryString}`,
+    `${process.env.NEXT_PUBLIC_API_URL}/api/commands?${queryString}`,
     { cache: "no-store" },
   );
 
