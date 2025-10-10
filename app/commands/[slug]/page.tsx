@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { CommandCard } from "@/components/command-card";
 import { CopyCommandButton } from "@/components/copy-command-button";
+import { BookmarkButton } from "@/components/bookmark-button";
 
 interface PageProps {
 	params: Promise<{ slug: string }>;
@@ -70,7 +71,16 @@ export default async function CommandDetailPage({ params }: PageProps) {
 									</p>
 								)}
 							</div>
-							<CopyCommandButton content={command.content} />
+							<div className="flex gap-2">
+								<BookmarkButton 
+									commandId={command.id} 
+									initialBookmarked={command.isBookmarked}
+									variant="outline" 
+									size="default"
+									showText={true}
+								/>
+								<CopyCommandButton content={command.content} />
+							</div>
 						</div>
 
 						{/* Command Content */}
@@ -122,8 +132,12 @@ export default async function CommandDetailPage({ params }: PageProps) {
 								<div className="space-y-4">
 									<h2 className="text-2xl font-bold">Related Commands</h2>
 									<div className="grid gap-4 md:grid-cols-2">
-										{related.slice(0, 4).map((cmd: never) => (
-											<CommandCard key={(cmd as { id: string }).id} command={cmd} />
+										{related.slice(0, 4).map((cmd: { id: string; isBookmarked?: boolean }) => (
+											<CommandCard 
+												key={cmd.id} 
+												command={cmd} 
+												isBookmarked={cmd.isBookmarked}
+											/>
 										))}
 									</div>
 								</div>

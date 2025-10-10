@@ -85,8 +85,12 @@ export default async function CommandsPage({ searchParams }: PageProps) {
 							</div>
 						) : (
 							<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-								{commands.map((command: never) => (
-									<CommandCard key={(command as { id: string }).id} command={command} />
+								{commands.map((command: { id: string; isBookmarked?: boolean }) => (
+									<CommandCard 
+										key={command.id} 
+										command={command} 
+										isBookmarked={command.isBookmarked}
+									/>
 								))}
 							</div>
 						)}

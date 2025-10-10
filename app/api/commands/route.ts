@@ -1,10 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { db } from "@/db";
-import { commands, categories, commandTags, commandTagMap } from "@/db/schema";
+import { commands, categories, commandTags, commandTagMap, bookmarks } from "@/db/schema";
 import { eq, ilike, or, and, inArray, sql } from "drizzle-orm";
+import { auth } from "@clerk/nextjs/server";
 
 export async function GET(request: NextRequest) {
 	try {
+		const { userId } = await auth();
 		const searchParams = request.nextUrl.searchParams;
 		const q = searchParams.get("q");
 		const category = searchParams.get("category");
@@ -84,8 +87,24 @@ export async function GET(request: NextRequest) {
 				.then((res) => Number(res[0]?.count || 0)),
 		]);
 
+		// Get bookmarked command IDs if user is authenticated
+		let bookmarkedCommandIds: string[] = [];
+		if (userId) {
+			const userBookmarks = await db
+				.select({ commandId: bookmarks.commandId })
+				.from(bookmarks)
+				.where(eq(bookmarks.userId, userId));
+			bookmarkedCommandIds = userBookmarks.map((b) => b.commandId);
+		}
+
+		// Add isBookmarked flag to each command
+		const commandsWithBookmarks = results.map((command) => ({
+			...command,
+			isBookmarked: bookmarkedCommandIds.includes(command.id),
+		}));
+
 		return NextResponse.json({
-			data: results,
+			data: commandsWithBookmarks,
 			pagination: {
 				page,
 				limit,

@@ -1,13 +1,16 @@
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { db } from "@/db";
-import { commands } from "@/db/schema";
+import { commands, bookmarks } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { auth } from "@clerk/nextjs/server";
 
 export async function GET(
-	request: NextRequest,
+	_request: NextRequest,
 	{ params }: { params: Promise<{ slug: string }> },
 ) {
 	try {
+		const { userId } = await auth();
 		const { slug } = await params;
 
 		const command = await db.query.commands.findFirst({
@@ -27,25 +30,48 @@ export async function GET(
 		}
 
 		// Find related commands (same category or tags)
-		const relatedCommands = await db.query.commands.findMany({
-			where: eq(commands.categoryId, command.categoryId!),
-			limit: 5,
-			with: {
-				category: true,
-				tags: {
+		const relatedCommands = command.categoryId
+			? await db.query.commands.findMany({
+					where: eq(commands.categoryId, command.categoryId),
+					limit: 5,
 					with: {
-						tag: true,
+						category: true,
+						tags: {
+							with: {
+								tag: true,
+							},
+						},
 					},
-				},
-			},
-		});
+				})
+			: [];
 
 		// Filter out the current command
 		const related = relatedCommands.filter((c) => c.id !== command.id);
 
+		// Get bookmarked command IDs if user is authenticated
+		let bookmarkedCommandIds: string[] = [];
+		if (userId) {
+			const userBookmarks = await db
+				.select({ commandId: bookmarks.commandId })
+				.from(bookmarks)
+				.where(eq(bookmarks.userId, userId));
+			bookmarkedCommandIds = userBookmarks.map((b) => b.commandId);
+		}
+
+		// Add isBookmarked flag to command and related commands
+		const commandWithBookmark = {
+			...command,
+			isBookmarked: bookmarkedCommandIds.includes(command.id),
+		};
+
+		const relatedWithBookmarks = related.map((cmd) => ({
+			...cmd,
+			isBookmarked: bookmarkedCommandIds.includes(cmd.id),
+		}));
+
 		return NextResponse.json({
-			data: command,
-			related,
+			data: commandWithBookmark,
+			related: relatedWithBookmarks,
 		});
 	} catch (error) {
 		console.error("Error fetching command:", error);

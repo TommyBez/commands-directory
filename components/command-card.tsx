@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { BookmarkButton } from "@/components/bookmark-button";
 import type { Command } from "@/db/schema";
 
 interface CommandCardProps {
@@ -8,9 +9,10 @@ interface CommandCardProps {
 		category?: { name: string; slug: string } | null;
 		tags?: Array<{ tag: { name: string; slug: string } }>;
 	};
+	isBookmarked?: boolean;
 }
 
-export function CommandCard({ command }: CommandCardProps) {
+export function CommandCard({ command, isBookmarked = false }: CommandCardProps) {
 	// Extract a preview from content (first 150 chars)
 	const contentPreview = command.content
 		?.replace(/^#.*$/gm, "") // Remove headings
@@ -20,9 +22,12 @@ export function CommandCard({ command }: CommandCardProps) {
 
 	return (
 		<Link href={`/commands/${command.slug}`}>
-			<Card className="transition-all hover:shadow-md hover:border-primary/50 cursor-pointer">
+			<Card className="transition-all hover:shadow-md hover:border-primary/50 cursor-pointer relative group">
+				<div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+					<BookmarkButton commandId={command.id} initialBookmarked={isBookmarked} />
+				</div>
 				<CardHeader>
-					<CardTitle className="text-lg">{command.title}</CardTitle>
+					<CardTitle className="text-lg pr-8">{command.title}</CardTitle>
 					<CardDescription className="line-clamp-2">
 						{command.description || contentPreview}
 					</CardDescription>

@@ -65,10 +65,11 @@ export default async function FavoritesPage() {
 						</div>
 					) : (
 						<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-							{bookmarks.map((bookmark: { command: never }) => (
+							{bookmarks.map((bookmark: Record<string, never>) => (
 								<CommandCard
 									key={(bookmark.command as { id: string }).id}
-									command={bookmark.command}
+									command={bookmark.command as Parameters<typeof CommandCard>[0]['command']}
+									isBookmarked={true}
 								/>
 							))}
 						</div>
