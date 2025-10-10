@@ -1,36 +1,209 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Cursor Commands Explorer
+
+A modern web application for discovering, searching, and mastering keyboard-driven commands. Built with Next.js, Clerk, Drizzle ORM, and Neon Postgres.
+
+## Features
+
+- 🔍 **Powerful Search**: Find commands by name, syntax, or description with advanced filtering
+- 📚 **Category Browsing**: Organize commands by categories and tags
+- ⭐ **Bookmarks**: Save your favorite commands for quick access
+- 📝 **Personal Notes**: Add context and reminders to commands
+- 🎯 **Multi-level Support**: Commands for beginners, intermediate, and advanced users
+- 🖥️ **Cross-platform**: Filter by OS (Mac, Windows, Linux)
+- 🚀 **Fast & Modern**: Built with Next.js 15 and React 19
+
+## Tech Stack
+
+- **Framework**: Next.js 15 (App Router)
+- **Authentication**: Clerk
+- **Database**: Neon Postgres (Serverless)
+- **ORM**: Drizzle ORM
+- **UI**: Tailwind CSS + Radix UI Components
+- **Testing**: Playwright (E2E)
+- **Package Manager**: pnpm
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
+- Node.js 20+
+- pnpm
+- Neon Postgres database
+- Clerk account
+
+### Installation
+
+1. Clone the repository:
+\`\`\`bash
+git clone <repository-url>
+cd commands-directory
+\`\`\`
+
+2. Install dependencies:
+\`\`\`bash
+pnpm install
+\`\`\`
+
+3. Set up environment variables:
+\`\`\`bash
+cp .env.example .env.local
+\`\`\`
+
+Then fill in your credentials:
+- `DATABASE_URL`: Your Neon Postgres connection string
+- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`: Your Clerk publishable key
+- `CLERK_SECRET_KEY`: Your Clerk secret key
+
+4. Generate and push the database schema:
+\`\`\`bash
+pnpm db:push
+\`\`\`
+
+5. Seed the database with initial data:
+\`\`\`bash
+pnpm db:seed
+\`\`\`
+
+6. Start the development server:
+\`\`\`bash
 pnpm dev
-# or
-bun dev
-```
+\`\`\`
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Visit [http://localhost:3000](http://localhost:3000) to see the application.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Available Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `pnpm dev` - Start development server
+- `pnpm build` - Build for production
+- `pnpm start` - Start production server
+- `pnpm lint` - Run Biome linter
+- `pnpm format` - Format code with Biome
+- `pnpm db:generate` - Generate Drizzle migrations
+- `pnpm db:migrate` - Run migrations
+- `pnpm db:push` - Push schema to database (development)
+- `pnpm db:studio` - Open Drizzle Studio
+- `pnpm db:seed` - Seed database with initial data
+- `pnpm test:e2e` - Run Playwright E2E tests (headless)
 
-## Learn More
+## Project Structure
 
-To learn more about Next.js, take a look at the following resources:
+\`\`\`
+├── app/                    # Next.js app directory
+│   ├── api/               # API routes
+│   │   ├── commands/      # Commands API
+│   │   ├── bookmarks/     # Bookmarks API
+│   │   ├── notes/         # Notes API
+│   │   ├── reports/       # Reports API
+│   │   └── export/        # Export API
+│   ├── commands/          # Commands pages
+│   ├── favorites/         # Favorites page
+│   ├── sign-in/           # Clerk sign-in
+│   └── sign-up/           # Clerk sign-up
+├── components/            # React components
+│   ├── ui/               # UI components (Radix)
+│   ├── command-card.tsx  # Command card component
+│   ├── command-filters.tsx
+│   ├── search-bar.tsx
+│   └── onboarding-modal.tsx
+├── db/                    # Database
+│   ├── schema/           # Drizzle schemas
+│   └── index.ts          # Database connection
+├── hooks/                 # Custom React hooks
+├── scripts/              # Utility scripts
+│   └── seed.ts          # Database seeding
+├── tests/                # E2E tests
+└── middleware.ts         # Clerk middleware
+\`\`\`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Database Schema
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Core Tables
 
-## Deploy on Vercel
+- **commands**: Command definitions with syntax, description, OS, level, etc.
+- **categories**: Command categories
+- **command_tags**: Tags for organizing commands
+- **command_tag_map**: Many-to-many relationship between commands and tags
+- **bookmarks**: User-saved favorite commands
+- **notes**: User notes attached to commands
+- **reports**: User-submitted issue reports
+- **user_profiles**: User preferences and onboarding state
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## API Endpoints
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Commands
+- `GET /api/commands` - List commands with search & filters
+- `GET /api/commands/[slug]` - Get command details
+
+### Bookmarks
+- `GET /api/bookmarks` - Get user bookmarks (auth required)
+- `POST /api/bookmarks` - Add bookmark (auth required)
+- `DELETE /api/bookmarks` - Remove bookmark (auth required)
+
+### Notes
+- `GET /api/notes` - Get user notes (auth required)
+- `POST /api/notes` - Create note (auth required)
+- `PUT /api/notes` - Update note (auth required)
+- `DELETE /api/notes` - Delete note (auth required)
+
+### Reports
+- `GET /api/reports` - List reports (auth required)
+- `POST /api/reports` - Submit report
+
+### Export
+- `GET /api/export` - Export commands (JSON/CSV)
+
+## Testing
+
+Run E2E tests with Playwright:
+
+\`\`\`bash
+pnpm test:e2e
+\`\`\`
+
+Tests cover:
+- Home page loading
+- Navigation between pages
+- Search functionality
+- Filtering commands
+- Command detail views
+
+## Deployment
+
+### Vercel (Recommended)
+
+1. Push your code to GitHub
+2. Import the project in Vercel
+3. Add environment variables
+4. Deploy
+
+### Database Migrations
+
+For production deployments, run migrations:
+
+\`\`\`bash
+pnpm db:migrate
+\`\`\`
+
+Then seed the database:
+
+\`\`\`bash
+pnpm db:seed
+\`\`\`
+
+## Contributing
+
+Contributions are welcome! Please follow these guidelines:
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run linting and tests
+5. Submit a pull request
+
+## License
+
+MIT License - see LICENSE file for details
+
+## Support
+
+For issues and questions, please open an issue on GitHub.
