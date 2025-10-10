@@ -5,43 +5,42 @@ import { userProfiles } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 export async function POST(request: NextRequest) {
-	try {
-		const { userId } = await auth();
+  try {
+    const { userId } = await auth();
 
-		if (!userId) {
-			return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-		}
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-		const { onboardingDismissed } = await request.json();
+    const { onboardingDismissed } = await request.json();
 
-		// Check if profile exists
-		const existing = await db.query.userProfiles.findFirst({
-			where: eq(userProfiles.userId, userId),
-		});
+    // Check if profile exists
+    const existing = await db.query.userProfiles.findFirst({
+      where: eq(userProfiles.userId, userId),
+    });
 
-		if (existing) {
-			// Update existing profile
-			await db
-				.update(userProfiles)
-				.set({
-					onboardingDismissedAt: onboardingDismissed ? new Date() : null,
-				})
-				.where(eq(userProfiles.userId, userId));
-		} else {
-			// Create new profile
-			await db.insert(userProfiles).values({
-				userId,
-				onboardingDismissedAt: onboardingDismissed ? new Date() : null,
-			});
-		}
+    if (existing) {
+      // Update existing profile
+      await db
+        .update(userProfiles)
+        .set({
+          onboardingDismissedAt: onboardingDismissed ? new Date() : null,
+        })
+        .where(eq(userProfiles.userId, userId));
+    } else {
+      // Create new profile
+      await db.insert(userProfiles).values({
+        userId,
+        onboardingDismissedAt: onboardingDismissed ? new Date() : null,
+      });
+    }
 
-		return NextResponse.json({ success: true });
-	} catch (error) {
-		console.error("Error updating user profile:", error);
-		return NextResponse.json(
-			{ error: "Failed to update profile" },
-			{ status: 500 },
-		);
-	}
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Error updating user profile:", error);
+    return NextResponse.json(
+      { error: "Failed to update profile" },
+      { status: 500 },
+    );
+  }
 }
-
