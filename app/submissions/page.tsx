@@ -55,8 +55,7 @@ export default async function SubmissionsPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <main className="container mx-auto flex-1 px-4 py-6 sm:py-8">
+    <main className="container mx-auto flex-1 px-4 py-6 sm:py-8">
         <div className="mx-auto max-w-5xl space-y-6 sm:space-y-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
@@ -176,7 +175,6 @@ export default async function SubmissionsPage() {
             </div>
           )}
         </div>
-      </main>
-    </div>
+    </main>
   )
 }

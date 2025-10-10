@@ -1,10 +1,10 @@
 import { auth } from '@clerk/nextjs/server'
 import { eq } from 'drizzle-orm'
-import { Header } from '@/components/header'
+import { AppSidebar } from '@/components/app-sidebar'
 import { db } from '@/db'
 import { userProfiles } from '@/db/schema/user-profiles'
 
-export async function HeaderWrapper() {
+export async function AppSidebarWrapper() {
   const { userId } = await auth()
 
   let isAdmin = false
@@ -16,5 +16,5 @@ export async function HeaderWrapper() {
     isAdmin = profile?.role === 'admin'
   }
 
-  return <Header isAdmin={isAdmin} />
+  return <AppSidebar isAdmin={isAdmin} />
 }

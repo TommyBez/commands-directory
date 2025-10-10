@@ -136,8 +136,7 @@ export default async function CommandsPage({ searchParams }: PageProps) {
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <main className="container mx-auto flex-1 px-4 py-6 sm:py-8">
+    <main className="container mx-auto flex-1 px-4 py-6 sm:py-8">
         <div className="space-y-6 sm:space-y-8">
           <div className="space-y-3 sm:space-y-4">
             <h2 className="font-bold text-2xl sm:text-3xl">Search Commands</h2>
@@ -202,7 +201,6 @@ export default async function CommandsPage({ searchParams }: PageProps) {
             )}
           </div>
         </div>
-      </main>
-    </div>
+    </main>
   )
 }

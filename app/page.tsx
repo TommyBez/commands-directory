@@ -18,7 +18,7 @@ export default async function Home() {
   })
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <>
       <OnboardingModal />
       <main className="flex-1">
         {/* Hero Section */}
@@ -120,6 +120,6 @@ export default async function Home() {
           </div>
         </section>
       </main>
-    </div>
+    </>
   )
 }

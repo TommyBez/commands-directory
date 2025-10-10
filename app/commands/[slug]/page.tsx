@@ -106,8 +106,7 @@ export default async function CommandDetailPage({ params }: PageProps) {
   }))
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <main className="container mx-auto flex-1 px-4 py-6 sm:py-8">
+    <main className="container mx-auto flex-1 px-4 py-6 sm:py-8">
         <div className="mx-auto max-w-4xl space-y-6 sm:space-y-8">
           {/* Breadcrumb */}
           <div className="text-muted-foreground text-xs sm:text-sm">
@@ -210,7 +209,6 @@ export default async function CommandDetailPage({ params }: PageProps) {
             )}
           </div>
         </div>
-      </main>
-    </div>
+    </main>
   )
 }
