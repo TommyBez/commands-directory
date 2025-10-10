@@ -28,7 +28,7 @@ export default async function SubmissionsPage() {
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}/api/user/commands`,
     {
-      cache: 'no-store'
+      cache: 'no-store',
     },
   )
 
