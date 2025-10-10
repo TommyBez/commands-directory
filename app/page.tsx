@@ -26,13 +26,10 @@ export default async function Home() {
           <div className="container mx-auto px-4">
             <div className="mx-auto max-w-4xl space-y-6 text-center sm:space-y-8">
               <h2 className="font-bold text-3xl leading-tight tracking-tight sm:text-4xl md:text-5xl lg:text-6xl">
-                Master Your Workflow with
-                <br className="hidden sm:block" />{' '}
-                <span className="text-primary">Keyboard Commands</span>
+                Copy-ready Cursor commands, shared by the community
               </h2>
               <p className="mx-auto max-w-2xl text-base text-muted-foreground sm:text-lg md:text-xl">
-                Discover, search, and learn keyboard-driven commands to boost
-                your productivity. Find the perfect shortcut for every task.
+                Discover proven commands snippets for Cursor's agent—search, preview, and paste in seconds to speed up your next task.
               </p>
               <div className="flex flex-col items-center gap-3 sm:gap-4">
                 <Suspense
@@ -56,29 +53,27 @@ export default async function Home() {
             <Card>
               <CardHeader>
                 <SearchIcon className="mb-2 h-6 w-6 text-primary sm:h-8 sm:w-8" />
-                <CardTitle className="text-lg sm:text-xl">Quick Search</CardTitle>
+                <CardTitle className="text-lg sm:text-xl">Curated by real Cursor power users</CardTitle>
                 <CardDescription className="text-sm">
-                  Find commands instantly with our powerful search and filtering
-                  system
+                  Commands are hand-picked and tested by experienced Cursor users who know what works
                 </CardDescription>
               </CardHeader>
             </Card>
             <Card>
               <CardHeader>
                 <BookmarkIcon className="mb-2 h-6 w-6 text-primary sm:h-8 sm:w-8" />
-                <CardTitle className="text-lg sm:text-xl">Save Favorites</CardTitle>
+                <CardTitle className="text-lg sm:text-xl">One-click copy with usage notes & examples</CardTitle>
                 <CardDescription className="text-sm">
-                  Bookmark frequently used commands and add personal notes
+                  Copy commands instantly with detailed usage instructions and real-world examples
                 </CardDescription>
               </CardHeader>
             </Card>
             <Card className="sm:col-span-2 md:col-span-1">
               <CardHeader>
                 <ZapIcon className="mb-2 h-6 w-6 text-primary sm:h-8 sm:w-8" />
-                <CardTitle className="text-lg sm:text-xl">Learn Fast</CardTitle>
+                <CardTitle className="text-lg sm:text-xl">Tags for stack, framework, and goal</CardTitle>
                 <CardDescription className="text-sm">
-                  Browse by category and tags to find reusable commands for your
-                  workflow
+                  Find exactly what you need with smart tags for your tech stack, framework, and specific goals
                 </CardDescription>
               </CardHeader>
             </Card>
