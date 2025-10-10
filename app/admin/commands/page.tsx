@@ -5,6 +5,7 @@ import { CommandModerationCard } from '@/components/command-moderation-card'
 import { Card, CardContent } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { db } from '@/db'
+import { commands } from '@/db/schema/commands'
 import type { Command } from '@/db/schema/commands'
 import { userProfiles } from '@/db/schema/user-profiles'
 
@@ -36,29 +37,44 @@ export default async function AdminCommandsPage() {
     redirect('/')
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL
-
-  const [pendingRes, approvedRes, rejectedRes] = await Promise.all([
-    fetch(`${baseUrl}/api/admin/commands?status=pending`, {
-      cache: 'no-store',
+  const [pendingCommands, approvedCommands, rejectedCommands] = await Promise.all([
+    db.query.commands.findMany({
+      where: eq(commands.status, 'pending'),
+      with: {
+        category: true,
+        tags: {
+          with: {
+            tag: true,
+          },
+        },
+      },
+      orderBy: (table, { desc }) => [desc(table.createdAt)],
     }),
-    fetch(`${baseUrl}/api/admin/commands?status=approved`, {
-      cache: 'no-store',
+    db.query.commands.findMany({
+      where: eq(commands.status, 'approved'),
+      with: {
+        category: true,
+        tags: {
+          with: {
+            tag: true,
+          },
+        },
+      },
+      orderBy: (table, { desc }) => [desc(table.createdAt)],
     }),
-    fetch(`${baseUrl}/api/admin/commands?status=rejected`, {
-      cache: 'no-store',
+    db.query.commands.findMany({
+      where: eq(commands.status, 'rejected'),
+      with: {
+        category: true,
+        tags: {
+          with: {
+            tag: true,
+          },
+        },
+      },
+      orderBy: (table, { desc }) => [desc(table.createdAt)],
     }),
   ])
-
-  const { data: pendingCommands } = (await pendingRes.json()) as {
-    data: CommandWithRelations[]
-  }
-  const { data: approvedCommands } = (await approvedRes.json()) as {
-    data: CommandWithRelations[]
-  }
-  const { data: rejectedCommands } = (await rejectedRes.json()) as {
-    data: CommandWithRelations[]
-  }
 
   return (
     <div className="flex min-h-screen flex-col">
