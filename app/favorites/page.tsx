@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
-import { CommandIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CommandCard } from "@/components/command-card";
 import { cookies } from "next/headers";
@@ -28,23 +27,6 @@ export default async function FavoritesPage() {
 
 	return (
 		<div className="min-h-screen flex flex-col">
-			<header className="border-b">
-				<div className="container mx-auto px-4 py-4 flex items-center justify-between">
-					<Link href="/" className="flex items-center gap-2">
-						<CommandIcon className="h-6 w-6" />
-						<h1 className="text-xl font-bold">Cursor Commands Explorer</h1>
-					</Link>
-					<div className="flex gap-2">
-						<Button variant="ghost" asChild>
-							<Link href="/commands">Browse</Link>
-						</Button>
-						<Button variant="ghost" asChild>
-							<Link href="/favorites">Favorites</Link>
-						</Button>
-					</div>
-				</div>
-			</header>
-
 			<main className="flex-1 container mx-auto px-4 py-8">
 				<div className="max-w-5xl mx-auto space-y-8">
 					<div>

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { SearchBar } from "@/components/search-bar";
 import { OnboardingModal } from "@/components/onboarding-modal";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { CommandIcon, BookmarkIcon, SearchIcon, ZapIcon } from "lucide-react";
+import { BookmarkIcon, SearchIcon, ZapIcon } from "lucide-react";
 import { db } from "@/db";
 
 export default async function Home() {
@@ -15,26 +15,6 @@ export default async function Home() {
 	return (
 		<div className="min-h-screen flex flex-col">
 			<OnboardingModal />
-			<header className="border-b">
-				<div className="container mx-auto px-4 py-4 flex items-center justify-between">
-					<div className="flex items-center gap-2">
-						<CommandIcon className="h-6 w-6" />
-						<h1 className="text-xl font-bold">Cursor Commands Explorer</h1>
-					</div>
-					<div className="flex gap-2">
-						<Button variant="ghost" asChild>
-							<Link href="/commands">Browse</Link>
-						</Button>
-						<Button variant="ghost" asChild>
-							<Link href="/favorites">Favorites</Link>
-						</Button>
-						<Button variant="outline" asChild>
-							<Link href="/sign-in">Sign In</Link>
-						</Button>
-					</div>
-				</div>
-			</header>
-
 			<main className="flex-1">
 				{/* Hero Section */}
 				<section className="bg-gradient-to-b from-background to-muted/50 py-20">
