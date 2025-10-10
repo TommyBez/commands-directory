@@ -118,14 +118,6 @@ export default async function Home() {
           </div>
         </section>
       </main>
-
-      <footer className="border-t py-8">
-        <div className="container mx-auto px-4 text-center text-muted-foreground text-sm">
-          <p>
-            © 2025 Cursor Commands Explorer. Built with Next.js and Drizzle.
-          </p>
-        </div>
-      </footer>
     </div>
   )
 }
