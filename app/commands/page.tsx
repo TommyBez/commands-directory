@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { SearchBar } from "@/components/search-bar";
 import { CommandFilters } from "@/components/command-filters";
 import { CommandCard } from "@/components/command-card";
+import type { Command } from "@/db/schema";
 
 interface PageProps {
   searchParams: Promise<{
@@ -12,6 +13,12 @@ interface PageProps {
     page?: string;
   }>;
 }
+
+type CommandWithRelations = Command & {
+  category?: { name: string; slug: string } | null;
+  tags?: Array<{ tag: { name: string; slug: string } }>;
+  isBookmarked?: boolean;
+};
 
 export default async function CommandsPage({ searchParams }: PageProps) {
   const params = await searchParams;
@@ -30,7 +37,10 @@ export default async function CommandsPage({ searchParams }: PageProps) {
     { cache: "no-store" },
   );
 
-  const { data: commands, pagination } = await response.json();
+  const { data: commands, pagination } = (await response.json()) as {
+    data: CommandWithRelations[];
+    pagination: { total: number; page: number; totalPages: number };
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -65,15 +75,13 @@ export default async function CommandsPage({ searchParams }: PageProps) {
               </div>
             ) : (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {commands.map(
-                  (command: { id: string; isBookmarked?: boolean }) => (
-                    <CommandCard
-                      key={command.id}
-                      command={command}
-                      isBookmarked={command.isBookmarked}
-                    />
-                  ),
-                )}
+                {commands.map((command) => (
+                  <CommandCard
+                    key={command.id}
+                    command={command}
+                    isBookmarked={command.isBookmarked}
+                  />
+                ))}
               </div>
             )}
 
