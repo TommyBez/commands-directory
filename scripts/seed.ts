@@ -4,9 +4,12 @@ dotenv.config({ path: '.env.local' })
 
 import { db } from '../db'
 import { categories, type NewCategory } from '../db/schema/categories'
-import { commandTagMap, commandTags, type NewCommandTag } from '../db/schema/command-tags'
+import {
+  commandTagMap,
+  commandTags,
+  type NewCommandTag,
+} from '../db/schema/command-tags'
 import { commands, type NewCommand } from '../db/schema/commands'
-
 
 async function seed() {
   console.log('🌱 Seeding database...')
