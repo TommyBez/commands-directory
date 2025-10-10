@@ -12,6 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { logger } from '@/lib/logger'
 
 export function OnboardingModal() {
   const { userId } = useAuth()
@@ -41,7 +42,7 @@ export function OnboardingModal() {
           body: JSON.stringify({ onboardingDismissed: true }),
         })
       } catch (error) {
-        console.error('Failed to save onboarding state:', error)
+        logger.error('Failed to save onboarding state:', error)
       }
     }
   }

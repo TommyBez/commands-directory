@@ -2,7 +2,8 @@ import { auth } from '@clerk/nextjs/server'
 import { eq } from 'drizzle-orm'
 import { type NextRequest, NextResponse } from 'next/server'
 import { db } from '@/db'
-import { userProfiles } from '@/db/schema'
+import { userProfiles } from '@/db/schema/user-profiles'
+import { logger } from '@/lib/logger'
 
 export async function POST(request: NextRequest) {
   try {
@@ -37,7 +38,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error updating user profile:', error)
+    logger.error('Error updating user profile:', error)
     return NextResponse.json(
       { error: 'Failed to update profile' },
       { status: 500 },

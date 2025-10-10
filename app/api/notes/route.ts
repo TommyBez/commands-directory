@@ -2,7 +2,8 @@ import { auth } from '@clerk/nextjs/server'
 import { and, eq } from 'drizzle-orm'
 import { type NextRequest, NextResponse } from 'next/server'
 import { db } from '@/db'
-import { notes } from '@/db/schema'
+import { notes } from '@/db/schema/notes'
+import { logger } from '@/lib/logger'
 
 export async function GET(request: NextRequest) {
   try {
@@ -21,7 +22,7 @@ export async function GET(request: NextRequest) {
         with: {
           command: true,
         },
-        orderBy: (notes, { desc }) => [desc(notes.updatedAt)],
+        orderBy: (table, { desc }) => [desc(table.updatedAt)],
       })
 
       return NextResponse.json({ data: userNotes })
@@ -30,12 +31,12 @@ export async function GET(request: NextRequest) {
     // Get notes for specific command
     const commandNotes = await db.query.notes.findMany({
       where: and(eq(notes.userId, userId), eq(notes.commandId, commandId)),
-      orderBy: (notes, { desc }) => [desc(notes.updatedAt)],
+      orderBy: (table, { desc }) => [desc(table.updatedAt)],
     })
 
     return NextResponse.json({ data: commandNotes })
   } catch (error) {
-    console.error('Error fetching notes:', error)
+    logger.error('Error fetching notes:', error)
     return NextResponse.json(
       { error: 'Failed to fetch notes' },
       { status: 500 },
@@ -67,7 +68,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ data: note[0] }, { status: 201 })
   } catch (error) {
-    console.error('Error creating note:', error)
+    logger.error('Error creating note:', error)
     return NextResponse.json(
       { error: 'Failed to create note' },
       { status: 500 },
@@ -104,7 +105,7 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({ data: note[0] })
   } catch (error) {
-    console.error('Error updating note:', error)
+    logger.error('Error updating note:', error)
     return NextResponse.json(
       { error: 'Failed to update note' },
       { status: 500 },
@@ -132,7 +133,7 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error deleting note:', error)
+    logger.error('Error deleting note:', error)
     return NextResponse.json(
       { error: 'Failed to delete note' },
       { status: 500 },

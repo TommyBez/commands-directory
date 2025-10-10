@@ -29,7 +29,9 @@ export function CommandFilters() {
   const clearFilters = () => {
     const params = new URLSearchParams()
     const q = searchParams.get('q')
-    if (q) params.set('q', q)
+    if (q) {
+      params.set('q', q)
+    }
     router.push(`/commands?${params.toString()}`)
   }
 

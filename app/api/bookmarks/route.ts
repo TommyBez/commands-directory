@@ -2,7 +2,8 @@ import { auth } from '@clerk/nextjs/server'
 import { and, eq } from 'drizzle-orm'
 import { type NextRequest, NextResponse } from 'next/server'
 import { db } from '@/db'
-import { bookmarks } from '@/db/schema'
+import { bookmarks } from '@/db/schema/bookmarks'
+import { logger } from '@/lib/logger'
 
 export async function GET() {
   try {
@@ -26,12 +27,12 @@ export async function GET() {
           },
         },
       },
-      orderBy: (bookmarks, { desc }) => [desc(bookmarks.createdAt)],
+      orderBy: (table, { desc }) => [desc(table.createdAt)],
     })
 
     return NextResponse.json({ data: userBookmarks })
   } catch (error) {
-    console.error('Error fetching bookmarks:', error)
+    logger.error('Error fetching bookmarks:', error)
     return NextResponse.json(
       { error: 'Failed to fetch bookmarks' },
       { status: 500 },
@@ -78,7 +79,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ data: bookmark[0] }, { status: 201 })
   } catch (error) {
-    console.error('Error creating bookmark:', error)
+    logger.error('Error creating bookmark:', error)
     return NextResponse.json(
       { error: 'Failed to create bookmark' },
       { status: 500 },
@@ -111,7 +112,7 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error deleting bookmark:', error)
+    logger.error('Error deleting bookmark:', error)
     return NextResponse.json(
       { error: 'Failed to delete bookmark' },
       { status: 500 },

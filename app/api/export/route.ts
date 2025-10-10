@@ -1,7 +1,8 @@
 import { ilike, or } from 'drizzle-orm'
 import { type NextRequest, NextResponse } from 'next/server'
 import { db } from '@/db'
-import { commands } from '@/db/schema'
+import { commands } from '@/db/schema/commands'
+import { logger } from '@/lib/logger'
 
 export async function GET(request: NextRequest) {
   try {
@@ -10,19 +11,13 @@ export async function GET(request: NextRequest) {
     const format = searchParams.get('format') || 'json'
 
     // Build where clause (similar to main commands endpoint)
-    const conditions = []
-
-    if (q) {
-      conditions.push(
-        or(
+    const whereClause = q
+      ? or(
           ilike(commands.title, `%${q}%`),
           ilike(commands.description, `%${q}%`),
           ilike(commands.content, `%${q}%`),
-        ),
-      )
-    }
-
-    const whereClause = conditions.length > 0 ? or(...conditions) : undefined
+        )
+      : undefined
 
     const results = await db.query.commands.findMany({
       where: whereClause,
@@ -66,7 +61,7 @@ export async function GET(request: NextRequest) {
     // Default to JSON
     return NextResponse.json({ data: results })
   } catch (error) {
-    console.error('Error exporting commands:', error)
+    logger.error('Error exporting commands:', error)
     return NextResponse.json(
       { error: 'Failed to export commands' },
       { status: 500 },

@@ -6,8 +6,11 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
+import { logger } from '@/lib/logger'
 
-interface BookmarkButtonProps {
+const BOOKMARK_ALREADY_EXISTS_STATUS = 409
+
+type BookmarkButtonProps = {
   commandId: string
   initialBookmarked?: boolean
   variant?: 'default' | 'ghost' | 'outline'
@@ -32,13 +35,33 @@ export function BookmarkButton({
     setIsBookmarked(initialBookmarked)
   }, [initialBookmarked])
 
+  const handleAuthCheck = () => {
+    if (!isSignedIn) {
+      toast.error('Please sign in to bookmark commands')
+      router.push('/sign-in')
+      return false
+    }
+    return true
+  }
+
+  const handleBookmarkResponse = async (response: Response) => {
+    if (!response.ok) {
+      const data = await response.json()
+      if (response.status === BOOKMARK_ALREADY_EXISTS_STATUS && !isBookmarked) {
+        setIsBookmarked(true)
+        toast.info('Command is already in your favorites')
+        return { success: true }
+      }
+      throw new Error(data.error || 'Failed to update bookmark')
+    }
+    return { success: false }
+  }
+
   const handleToggleBookmark = async (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
 
-    if (!isSignedIn) {
-      toast.error('Please sign in to bookmark commands')
-      router.push('/sign-in')
+    if (!handleAuthCheck()) {
       return
     }
 
@@ -57,26 +80,18 @@ export function BookmarkButton({
         body: JSON.stringify({ commandId }),
       })
 
-      if (!response.ok) {
-        const data = await response.json()
-        if (response.status === 409 && !isBookmarked) {
-          // Already bookmarked
-          setIsBookmarked(true)
-          toast.info('Command is already in your favorites')
-          return
-        }
-        throw new Error(data.error || 'Failed to update bookmark')
+      const result = await handleBookmarkResponse(response)
+      if (result.success) {
+        return
       }
 
       setIsBookmarked(!isBookmarked)
       toast.success(
         isBookmarked ? 'Removed from favorites' : 'Added to favorites',
       )
-
-      // Refresh the page data
       router.refresh()
     } catch (error) {
-      console.error('Error toggling bookmark:', error)
+      logger.error('Error toggling bookmark:', error)
       toast.error('Failed to update bookmark')
     } finally {
       setIsLoading(false)

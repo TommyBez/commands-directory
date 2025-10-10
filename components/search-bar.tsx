@@ -15,6 +15,10 @@ import {
 } from '@/components/ui/command'
 import { Kbd, KbdGroup } from '@/components/ui/kbd'
 import { Skeleton } from '@/components/ui/skeleton'
+import { logger } from '@/lib/logger'
+
+const MAX_RECENT_SEARCHES = 5
+const SEARCH_COMMANDS_DELAY = 300
 
 type Command = {
   id: string
@@ -59,7 +63,7 @@ export function SearchBar() {
       const data = await response.json()
       setCommands(data.data || [])
     } catch (error) {
-      console.error('Error searching commands:', error)
+      logger.error('Error searching commands:', error)
       setCommands([])
     } finally {
       setLoading(false)
@@ -74,7 +78,7 @@ export function SearchBar() {
       } else {
         setCommands([])
       }
-    }, 300)
+    }, SEARCH_COMMANDS_DELAY)
 
     return () => clearTimeout(timer)
   }, [query, searchCommands])
@@ -84,7 +88,7 @@ export function SearchBar() {
     const down = (e: KeyboardEvent) => {
       if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
         e.preventDefault()
-        setOpen((open) => !open)
+        setOpen((prevOpen) => !prevOpen)
       }
     }
 
@@ -96,13 +100,15 @@ export function SearchBar() {
     const newRecentSearches = [
       searchQuery,
       ...recentSearches.filter((s) => s !== searchQuery),
-    ].slice(0, 5)
+    ].slice(0, MAX_RECENT_SEARCHES)
     setRecentSearches(newRecentSearches)
     localStorage.setItem('recentSearches', JSON.stringify(newRecentSearches))
   }
 
   const handleViewAllResults = () => {
-    if (!query.trim()) return
+    if (!query.trim()) {
+      return
+    }
     saveToRecentSearches(query)
     const params = new URLSearchParams(searchParams)
     params.set('q', query)
@@ -153,11 +159,14 @@ export function SearchBar() {
               <div className="px-2 py-1.5 font-medium text-muted-foreground text-xs">
                 Commands
               </div>
-              {[1, 2, 3, 4, 5].map((id) => (
-                <div
-                  className="flex items-start gap-2 px-2 py-3"
-                  key={`skeleton-${id}`}
-                >
+              {[
+                'skeleton-1',
+                'skeleton-2',
+                'skeleton-3',
+                'skeleton-4',
+                'skeleton-5',
+              ].map((key) => (
+                <div className="flex items-start gap-2 px-2 py-3" key={key}>
                   <Skeleton className="mt-0.5 h-4 w-4 shrink-0" />
                   <div className="flex-1 space-y-2">
                     <div className="flex items-center gap-2">

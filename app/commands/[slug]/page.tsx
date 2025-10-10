@@ -9,7 +9,9 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 
-interface PageProps {
+const MAX_RELATED_COMMANDS = 4
+
+type PageProps = {
   params: Promise<{ slug: string }>
 }
 
@@ -115,7 +117,7 @@ export default async function CommandDetailPage({ params }: PageProps) {
                   <h2 className="font-bold text-2xl">Related Commands</h2>
                   <div className="grid gap-4 md:grid-cols-2">
                     {related
-                      .slice(0, 4)
+                      .slice(0, MAX_RELATED_COMMANDS)
                       .map((cmd: { id: string; isBookmarked?: boolean }) => (
                         <CommandCard
                           command={cmd}

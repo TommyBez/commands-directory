@@ -3,7 +3,9 @@ import { eq } from 'drizzle-orm'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { db } from '@/db'
-import { bookmarks, commands } from '@/db/schema'
+import { bookmarks } from '@/db/schema/bookmarks'
+import { commands } from '@/db/schema/commands'
+import { logger } from '@/lib/logger'
 
 export async function GET(
   _request: NextRequest,
@@ -74,7 +76,7 @@ export async function GET(
       related: relatedWithBookmarks,
     })
   } catch (error) {
-    console.error('Error fetching command:', error)
+    logger.error('Error fetching command:', error)
     return NextResponse.json(
       { error: 'Failed to fetch command' },
       { status: 500 },

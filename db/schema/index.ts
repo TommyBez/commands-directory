@@ -1,7 +1,0 @@
-export * from './bookmarks'
-export * from './categories'
-export * from './command-tags'
-export * from './commands'
-export * from './notes'
-export * from './reports'
-export * from './user-profiles'

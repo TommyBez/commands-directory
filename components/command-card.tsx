@@ -8,9 +8,12 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import type { Command } from '@/db/schema'
+import type { Command } from '@/db/schema/commands'
 
-interface CommandCardProps {
+const CONTENT_PREVIEW_LENGTH = 150
+const MAX_TAGS = 3
+
+type CommandCardProps = {
   command: Command & {
     category?: { name: string; slug: string } | null
     tags?: Array<{ tag: { name: string; slug: string } }>
@@ -27,7 +30,7 @@ export function CommandCard({
     ?.replace(/^#.*$/gm, '') // Remove headings
     .replace(/\n+/g, ' ') // Replace newlines with spaces
     .trim()
-    .slice(0, 150)
+    .slice(0, CONTENT_PREVIEW_LENGTH)
 
   return (
     <Link href={`/commands/${command.slug}`}>
@@ -53,7 +56,7 @@ export function CommandCard({
             )}
             {command.tags && command.tags.length > 0 && (
               <div className="flex flex-wrap gap-1">
-                {command.tags.slice(0, 3).map((tagRel) => (
+                {command.tags.slice(0, MAX_TAGS).map((tagRel) => (
                   <Badge
                     className="text-xs"
                     key={tagRel.tag.slug}

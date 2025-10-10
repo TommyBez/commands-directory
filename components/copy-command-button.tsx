@@ -4,7 +4,9 @@ import { CheckIcon, CopyIcon } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 
-interface CopyCommandButtonProps {
+const COPY_COMMAND_BUTTON_TIMEOUT = 2000
+
+type CopyCommandButtonProps = {
   content: string
 }
 
@@ -14,7 +16,7 @@ export function CopyCommandButton({ content }: CopyCommandButtonProps) {
   const handleCopy = async () => {
     await navigator.clipboard.writeText(content)
     setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+    setTimeout(() => setCopied(false), COPY_COMMAND_BUTTON_TIMEOUT)
   }
 
   return (

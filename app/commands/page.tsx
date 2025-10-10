@@ -3,9 +3,9 @@ import { CommandCard } from '@/components/command-card'
 import { CommandFilters } from '@/components/command-filters'
 import { SearchBar } from '@/components/search-bar'
 import { Button } from '@/components/ui/button'
-import type { Command } from '@/db/schema'
+import type { Command } from '@/db/schema/commands'
 
-interface PageProps {
+type PageProps = {
   searchParams: Promise<{
     q?: string
     category?: string
@@ -25,7 +25,9 @@ export default async function CommandsPage({ searchParams }: PageProps) {
   const queryString = new URLSearchParams(
     Object.entries(params).reduce(
       (acc, [key, value]) => {
-        if (value) acc[key] = value
+        if (value) {
+          acc[key] = value
+        }
         return acc
       },
       {} as Record<string, string>,

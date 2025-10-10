@@ -1,7 +1,8 @@
 import { auth } from '@clerk/nextjs/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { db } from '@/db'
-import { reports } from '@/db/schema'
+import { reports } from '@/db/schema/reports'
+import { logger } from '@/lib/logger'
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,7 +24,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ data: report[0] }, { status: 201 })
   } catch (error) {
-    console.error('Error creating report:', error)
+    logger.error('Error creating report:', error)
     return NextResponse.json(
       { error: 'Failed to create report' },
       { status: 500 },
@@ -44,13 +45,13 @@ export async function GET() {
       with: {
         command: true,
       },
-      orderBy: (reports, { desc }) => [desc(reports.createdAt)],
+      orderBy: (table, { desc }) => [desc(table.createdAt)],
       limit: 100,
     })
 
     return NextResponse.json({ data: allReports })
   } catch (error) {
-    console.error('Error fetching reports:', error)
+    logger.error('Error fetching reports:', error)
     return NextResponse.json(
       { error: 'Failed to fetch reports' },
       { status: 500 },
