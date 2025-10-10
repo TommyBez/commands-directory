@@ -77,34 +77,36 @@ export default async function AdminCommandsPage() {
   ])
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <main className="container mx-auto flex-1 px-4 py-8">
-        <div className="mx-auto max-w-6xl space-y-8">
+    <main className="container mx-auto flex-1 px-4 py-6 sm:py-8">
+        <div className="mx-auto max-w-6xl space-y-6 sm:space-y-8">
           <div>
-            <h1 className="font-bold text-3xl">Command Moderation</h1>
-            <p className="mt-2 text-muted-foreground">
+            <h1 className="font-bold text-2xl sm:text-3xl">Command Moderation</h1>
+            <p className="mt-2 text-sm text-muted-foreground sm:text-base">
               Review and manage submitted commands
             </p>
           </div>
 
           <Tabs defaultValue="pending">
-            <TabsList>
-              <TabsTrigger value="pending">
-                Pending ({pendingCommands.length})
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger className="text-xs sm:text-sm" value="pending">
+                <span className="hidden sm:inline">Pending ({pendingCommands.length})</span>
+                <span className="sm:hidden">Pending</span>
               </TabsTrigger>
-              <TabsTrigger value="approved">
-                Approved ({approvedCommands.length})
+              <TabsTrigger className="text-xs sm:text-sm" value="approved">
+                <span className="hidden sm:inline">Approved ({approvedCommands.length})</span>
+                <span className="sm:hidden">Approved</span>
               </TabsTrigger>
-              <TabsTrigger value="rejected">
-                Rejected ({rejectedCommands.length})
+              <TabsTrigger className="text-xs sm:text-sm" value="rejected">
+                <span className="hidden sm:inline">Rejected ({rejectedCommands.length})</span>
+                <span className="sm:hidden">Rejected</span>
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent className="space-y-4" value="pending">
+            <TabsContent className="space-y-3 sm:space-y-4" value="pending">
               {pendingCommands.length === 0 ? (
                 <Card>
                   <CardContent className="py-12 text-center">
-                    <p className="text-muted-foreground">
+                    <p className="text-sm text-muted-foreground sm:text-base">
                       No pending commands to review.
                     </p>
                   </CardContent>
@@ -116,11 +118,11 @@ export default async function AdminCommandsPage() {
               )}
             </TabsContent>
 
-            <TabsContent className="space-y-4" value="approved">
+            <TabsContent className="space-y-3 sm:space-y-4" value="approved">
               {approvedCommands.length === 0 ? (
                 <Card>
                   <CardContent className="py-12 text-center">
-                    <p className="text-muted-foreground">
+                    <p className="text-sm text-muted-foreground sm:text-base">
                       No approved commands.
                     </p>
                   </CardContent>
@@ -132,11 +134,11 @@ export default async function AdminCommandsPage() {
               )}
             </TabsContent>
 
-            <TabsContent className="space-y-4" value="rejected">
+            <TabsContent className="space-y-3 sm:space-y-4" value="rejected">
               {rejectedCommands.length === 0 ? (
                 <Card>
                   <CardContent className="py-12 text-center">
-                    <p className="text-muted-foreground">
+                    <p className="text-sm text-muted-foreground sm:text-base">
                       No rejected commands.
                     </p>
                   </CardContent>
@@ -149,7 +151,6 @@ export default async function AdminCommandsPage() {
             </TabsContent>
           </Tabs>
         </div>
-      </main>
-    </div>
+    </main>
   )
 }

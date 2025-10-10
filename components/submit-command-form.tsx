@@ -79,13 +79,13 @@ export function SubmitCommandForm({ categories }: SubmitCommandFormProps) {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Command Details</CardTitle>
+      <CardHeader className="p-4 sm:p-6">
+        <CardTitle className="text-lg sm:text-xl">Command Details</CardTitle>
       </CardHeader>
-      <CardContent>
-        <form className="space-y-6" onSubmit={handleSubmit}>
+      <CardContent className="p-4 sm:p-6">
+        <form className="space-y-4 sm:space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-2">
-            <Label htmlFor="title">
+            <Label className="text-sm" htmlFor="title">
               Title <span className="text-destructive">*</span>
             </Label>
             <Input
@@ -105,7 +105,9 @@ export function SubmitCommandForm({ categories }: SubmitCommandFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label className="text-sm" htmlFor="description">
+              Description
+            </Label>
             <Textarea
               id="description"
               maxLength={MAX_DESCRIPTION_LENGTH}
@@ -122,10 +124,11 @@ export function SubmitCommandForm({ categories }: SubmitCommandFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="content">
+            <Label className="text-sm" htmlFor="content">
               Command <span className="text-destructive">*</span>
             </Label>
             <Textarea
+              className="font-mono text-sm"
               id="content"
               maxLength={MAX_CONTENT_LENGTH}
               onChange={(e) =>
@@ -142,7 +145,9 @@ export function SubmitCommandForm({ categories }: SubmitCommandFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="category">Category</Label>
+            <Label className="text-sm" htmlFor="category">
+              Category
+            </Label>
             <Select
               onValueChange={(value) =>
                 setFormData({ ...formData, categoryId: value })
@@ -168,11 +173,12 @@ export function SubmitCommandForm({ categories }: SubmitCommandFormProps) {
             </div>
           )}
 
-          <div className="flex gap-4">
+          <div className="flex flex-col gap-2 sm:flex-row sm:gap-4">
             <Button className="flex-1" disabled={isSubmitting} type="submit">
               {isSubmitting ? 'Submitting...' : 'Submit Command'}
             </Button>
             <Button
+              className="flex-1 sm:flex-initial"
               disabled={isSubmitting}
               onClick={() => router.back()}
               type="button"

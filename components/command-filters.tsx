@@ -38,14 +38,14 @@ export function CommandFilters() {
   const hasFilters = searchParams.has('category') || searchParams.has('tag')
 
   return (
-    <div className="flex flex-wrap items-end gap-4">
+    <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end sm:gap-4">
       <div className="flex flex-col gap-2">
         <span className="font-medium text-sm">Category</span>
         <Select
           onValueChange={(value) => handleFilterChange('category', value)}
           value={searchParams.get('category') || 'all'}
         >
-          <SelectTrigger className="w-[200px]">
+          <SelectTrigger className="w-full sm:w-[200px]">
             <SelectValue placeholder="All Categories" />
           </SelectTrigger>
           <SelectContent>
@@ -69,7 +69,7 @@ export function CommandFilters() {
           onValueChange={(value) => handleFilterChange('tag', value)}
           value={searchParams.get('tag') || 'all'}
         >
-          <SelectTrigger className="w-[200px]">
+          <SelectTrigger className="w-full sm:w-[200px]">
             <SelectValue placeholder="All Tags" />
           </SelectTrigger>
           <SelectContent>
@@ -86,7 +86,12 @@ export function CommandFilters() {
       </div>
 
       {hasFilters && (
-        <Button onClick={clearFilters} size="sm" variant="outline">
+        <Button
+          className="w-full sm:w-auto"
+          onClick={clearFilters}
+          size="sm"
+          variant="outline"
+        >
           <XIcon className="mr-2 h-4 w-4" />
           Clear Filters
         </Button>

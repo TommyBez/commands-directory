@@ -2,8 +2,10 @@ import { ClerkProvider } from '@clerk/nextjs'
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { ThemeProvider } from 'next-themes'
+import { AppSidebarWrapper } from '@/components/app-sidebar-wrapper'
 import { Footer } from '@/components/footer'
 import { Header } from '@/components/header'
+import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { Toaster } from '@/components/ui/sonner'
 import './globals.css'
 
@@ -39,10 +41,17 @@ export default function RootLayout({
             disableTransitionOnChange
             enableSystem
           >
-            <Header />
-            {children}
-            <Footer />
-            <Toaster />
+            <SidebarProvider>
+              <AppSidebarWrapper />
+              <SidebarInset>
+                <Header />
+                <div className="flex min-h-[calc(100vh-4rem)] flex-1 flex-col">
+                  {children}
+                  <Footer />
+                </div>
+                <Toaster />
+              </SidebarInset>
+            </SidebarProvider>
           </ThemeProvider>
         </body>
       </html>

@@ -22,10 +22,10 @@ type CommandModerationCardProps = {
 export function CommandModerationCard({ command }: CommandModerationCardProps) {
   return (
     <Card>
-      <CardHeader>
-        <div className="flex items-start justify-between gap-4">
+      <CardHeader className="p-4 sm:p-6">
+        <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex-1">
-            <CardTitle className="text-xl">{command.title}</CardTitle>
+            <CardTitle className="text-lg sm:text-xl">{command.title}</CardTitle>
             {command.description && (
               <p className="mt-2 text-muted-foreground text-sm">
                 {command.description}
@@ -35,16 +35,16 @@ export function CommandModerationCard({ command }: CommandModerationCardProps) {
           <Badge>{command.status}</Badge>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-4 sm:p-6">
         <div className="space-y-4">
           <div>
             <p className="mb-1 font-medium text-sm">Command:</p>
-            <pre className="overflow-x-auto rounded-md bg-muted p-3 font-mono text-sm">
+            <pre className="overflow-x-auto whitespace-pre-wrap rounded-md bg-muted p-3 font-mono text-xs sm:text-sm">
               {command.content}
             </pre>
           </div>
 
-          <div className="flex flex-wrap items-center gap-4 text-sm">
+          <div className="flex flex-col gap-2 text-sm sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
             {command.category && (
               <div className="flex items-center gap-2">
                 <span className="text-muted-foreground">Category:</span>

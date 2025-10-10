@@ -94,10 +94,11 @@ export function ModerationActions({
         </div>
       )}
 
-      <div className="flex gap-2">
+      <div className="flex flex-col gap-2 sm:flex-row">
         {currentStatus === 'pending' && (
           <>
             <Button
+              className="flex-1 sm:flex-initial"
               disabled={isApproving}
               onClick={handleApprove}
               type="button"
@@ -107,7 +108,11 @@ export function ModerationActions({
 
             <Dialog onOpenChange={setRejectDialogOpen} open={rejectDialogOpen}>
               <DialogTrigger asChild>
-                <Button type="button" variant="destructive">
+                <Button
+                  className="flex-1 sm:flex-initial"
+                  type="button"
+                  variant="destructive"
+                >
                   Reject
                 </Button>
               </DialogTrigger>
@@ -154,7 +159,12 @@ export function ModerationActions({
         )}
 
         {currentStatus === 'rejected' && (
-          <Button disabled={isApproving} onClick={handleApprove} type="button">
+          <Button
+            className="flex-1 sm:flex-initial"
+            disabled={isApproving}
+            onClick={handleApprove}
+            type="button"
+          >
             {isApproving ? 'Approving...' : 'Approve'}
           </Button>
         )}
@@ -162,7 +172,11 @@ export function ModerationActions({
         {currentStatus === 'approved' && (
           <Dialog onOpenChange={setRejectDialogOpen} open={rejectDialogOpen}>
             <DialogTrigger asChild>
-              <Button type="button" variant="destructive">
+              <Button
+                className="flex-1 sm:flex-initial"
+                type="button"
+                variant="destructive"
+              >
                 Revoke Approval
               </Button>
             </DialogTrigger>

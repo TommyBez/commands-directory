@@ -136,21 +136,20 @@ export default async function CommandsPage({ searchParams }: PageProps) {
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <main className="container mx-auto flex-1 px-4 py-8">
-        <div className="space-y-8">
-          <div className="space-y-4">
-            <h2 className="font-bold text-3xl">Search Commands</h2>
+    <main className="container mx-auto flex-1 px-4 py-6 sm:py-8">
+        <div className="space-y-6 sm:space-y-8">
+          <div className="space-y-3 sm:space-y-4">
+            <h2 className="font-bold text-2xl sm:text-3xl">Search Commands</h2>
             <SearchBar />
           </div>
 
-          <div className="space-y-4">
-            <h3 className="font-semibold text-lg">Filters</h3>
+          <div className="space-y-3 sm:space-y-4">
+            <h3 className="font-semibold text-base sm:text-lg">Filters</h3>
             <CommandFilters />
           </div>
 
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-muted-foreground text-sm">
                 Found {pagination.total} command
                 {pagination.total !== 1 ? 's' : ''}
@@ -167,7 +166,7 @@ export default async function CommandsPage({ searchParams }: PageProps) {
                 </p>
               </div>
             ) : (
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {commandsWithBookmarks.map((command) => (
                   <CommandCard
                     command={command}
@@ -179,9 +178,9 @@ export default async function CommandsPage({ searchParams }: PageProps) {
             )}
 
             {pagination.totalPages > 1 && (
-              <div className="flex justify-center gap-2 pt-8">
+              <div className="flex flex-col gap-2 pt-6 sm:flex-row sm:justify-center sm:gap-2 sm:pt-8">
                 {pagination.page > 1 && (
-                  <Button asChild variant="outline">
+                  <Button asChild className="w-full sm:w-auto" variant="outline">
                     <Link
                       href={`/commands?${new URLSearchParams({ ...params, page: String(pagination.page - 1) }).toString()}`}
                     >
@@ -190,7 +189,7 @@ export default async function CommandsPage({ searchParams }: PageProps) {
                   </Button>
                 )}
                 {pagination.page < pagination.totalPages && (
-                  <Button asChild variant="outline">
+                  <Button asChild className="w-full sm:w-auto" variant="outline">
                     <Link
                       href={`/commands?${new URLSearchParams({ ...params, page: String(pagination.page + 1) }).toString()}`}
                     >
@@ -202,7 +201,6 @@ export default async function CommandsPage({ searchParams }: PageProps) {
             )}
           </div>
         </div>
-      </main>
-    </div>
+    </main>
   )
 }

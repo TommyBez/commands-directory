@@ -32,27 +32,26 @@ export default async function FavoritesPage() {
   })
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <main className="container mx-auto flex-1 px-4 py-8">
-        <div className="mx-auto max-w-5xl space-y-8">
+    <main className="container mx-auto flex-1 px-4 py-6 sm:py-8">
+        <div className="mx-auto max-w-5xl space-y-6 sm:space-y-8">
           <div>
-            <h1 className="font-bold text-3xl">My Favorites</h1>
-            <p className="mt-2 text-muted-foreground">
+            <h1 className="font-bold text-2xl sm:text-3xl">My Favorites</h1>
+            <p className="mt-2 text-sm text-muted-foreground sm:text-base">
               Commands you've bookmarked for quick access
             </p>
           </div>
 
           {userBookmarks.length === 0 ? (
             <div className="py-12 text-center">
-              <p className="mb-4 text-muted-foreground">
+              <p className="mb-4 text-sm text-muted-foreground sm:text-base">
                 You haven't bookmarked any commands yet.
               </p>
-              <Button asChild>
+              <Button asChild className="w-full sm:w-auto">
                 <Link href="/commands">Browse Commands</Link>
               </Button>
             </div>
           ) : (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {userBookmarks.map((bookmark) => (
                 <CommandCard
                   command={bookmark.command}
@@ -63,7 +62,6 @@ export default async function FavoritesPage() {
             </div>
           )}
         </div>
-      </main>
-    </div>
+    </main>
   )
 }

@@ -3,7 +3,7 @@ import Link from 'next/link'
 
 export function Footer() {
   return (
-    <footer className="container mx-auto border-t px-4 py-8 text-center text-muted-foreground text-sm">
+    <footer className="container mx-auto border-t px-4 py-6 text-center text-muted-foreground text-xs sm:py-8 sm:text-sm">
       <div className="flex flex-col items-center gap-2">
         <p>© 2025 Cursor Commands Explorer.</p>
         <Link
