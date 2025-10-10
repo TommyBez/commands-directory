@@ -1,7 +1,33 @@
 import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/nextjs'
+import { auth } from '@clerk/nextjs/server'
+import { eq } from 'drizzle-orm'
 import { CommandIcon } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { db } from '@/db'
+import { userProfiles } from '@/db/schema/user-profiles'
+
+async function AdminLink() {
+  const { userId } = await auth()
+
+  if (!userId) {
+    return null
+  }
+
+  const profile = await db.query.userProfiles.findFirst({
+    where: eq(userProfiles.userId, userId),
+  })
+
+  if (profile?.role !== 'admin') {
+    return null
+  }
+
+  return (
+    <Button asChild variant="ghost">
+      <Link href="/admin/commands">Admin</Link>
+    </Button>
+  )
+}
 
 export function Header() {
   return (
@@ -22,7 +48,14 @@ export function Header() {
             <Button asChild variant="ghost">
               <Link href="/favorites">Favorites</Link>
             </Button>
+            <Button asChild variant="ghost">
+              <Link href="/commands/new">Submit</Link>
+            </Button>
+            <Button asChild variant="ghost">
+              <Link href="/submissions">My Submissions</Link>
+            </Button>
           </SignedIn>
+          <AdminLink />
           <SignedOut>
             <SignInButton mode="modal">
               <Button variant="outline">Sign In</Button>
