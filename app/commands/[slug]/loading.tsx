@@ -1,12 +1,12 @@
-import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Separator } from '@/components/ui/separator'
+import { Skeleton } from '@/components/ui/skeleton'
 
 export default function CommandDetailLoading() {
   return (
-    <div className="min-h-screen flex flex-col">
-      <main className="flex-1 container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto space-y-8">
+    <div className="flex min-h-screen flex-col">
+      <main className="container mx-auto flex-1 px-4 py-8">
+        <div className="mx-auto max-w-4xl space-y-8">
           {/* Breadcrumb */}
           <div className="flex gap-2">
             <Skeleton className="h-5 w-24" />
@@ -45,7 +45,7 @@ export default function CommandDetailLoading() {
             </Card>
 
             {/* Metadata */}
-            <div className="flex flex-wrap gap-4 items-center">
+            <div className="flex flex-wrap items-center gap-4">
               <div className="flex items-center gap-2">
                 <Skeleton className="h-5 w-16" />
                 <Skeleton className="h-5 w-24" />
@@ -100,5 +100,5 @@ export default function CommandDetailLoading() {
         </div>
       </main>
     </div>
-  );
+  )
 }

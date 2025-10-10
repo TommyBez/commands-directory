@@ -1,48 +1,48 @@
-import Link from "next/link";
-import { Suspense } from "react";
-import { Button } from "@/components/ui/button";
-import { SearchBar } from "@/components/search-bar";
-import { OnboardingModal } from "@/components/onboarding-modal";
+import { BookmarkIcon, SearchIcon, ZapIcon } from 'lucide-react'
+import Link from 'next/link'
+import { Suspense } from 'react'
+import { OnboardingModal } from '@/components/onboarding-modal'
+import { SearchBar } from '@/components/search-bar'
+import { Button } from '@/components/ui/button'
 import {
   Card,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { BookmarkIcon, SearchIcon, ZapIcon } from "lucide-react";
-import { db } from "@/db";
+} from '@/components/ui/card'
+import { db } from '@/db'
 
 export default async function Home() {
   const featuredCategories = await db.query.categories.findMany({
     limit: 4,
-  });
+  })
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="flex min-h-screen flex-col">
       <OnboardingModal />
       <main className="flex-1">
         {/* Hero Section */}
         <section className="bg-gradient-to-b from-background to-muted/50 py-20">
           <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto text-center space-y-8">
-              <h2 className="text-4xl md:text-6xl font-bold tracking-tight">
+            <div className="mx-auto max-w-4xl space-y-8 text-center">
+              <h2 className="font-bold text-4xl tracking-tight md:text-6xl">
                 Master Your Workflow with
                 <br />
                 <span className="text-primary">Keyboard Commands</span>
               </h2>
-              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              <p className="mx-auto max-w-2xl text-muted-foreground text-xl">
                 Discover, search, and learn keyboard-driven commands to boost
                 your productivity. Find the perfect shortcut for every task.
               </p>
               <div className="flex flex-col items-center gap-4">
                 <Suspense
                   fallback={
-                    <div className="w-full max-w-2xl h-12 bg-muted animate-pulse rounded-md" />
+                    <div className="h-12 w-full max-w-2xl animate-pulse rounded-md bg-muted" />
                   }
                 >
                   <SearchBar />
                 </Suspense>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   Try searching for commands like "code review" or "onboarding"
                 </p>
               </div>
@@ -51,11 +51,11 @@ export default async function Home() {
         </section>
 
         {/* Features Section */}
-        <section className="py-16 container mx-auto px-4">
-          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+        <section className="container mx-auto px-4 py-16">
+          <div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-3">
             <Card>
               <CardHeader>
-                <SearchIcon className="h-8 w-8 mb-2 text-primary" />
+                <SearchIcon className="mb-2 h-8 w-8 text-primary" />
                 <CardTitle>Quick Search</CardTitle>
                 <CardDescription>
                   Find commands instantly with our powerful search and filtering
@@ -65,7 +65,7 @@ export default async function Home() {
             </Card>
             <Card>
               <CardHeader>
-                <BookmarkIcon className="h-8 w-8 mb-2 text-primary" />
+                <BookmarkIcon className="mb-2 h-8 w-8 text-primary" />
                 <CardTitle>Save Favorites</CardTitle>
                 <CardDescription>
                   Bookmark frequently used commands and add personal notes
@@ -74,7 +74,7 @@ export default async function Home() {
             </Card>
             <Card>
               <CardHeader>
-                <ZapIcon className="h-8 w-8 mb-2 text-primary" />
+                <ZapIcon className="mb-2 h-8 w-8 text-primary" />
                 <CardTitle>Learn Fast</CardTitle>
                 <CardDescription>
                   Browse by category and tags to find reusable commands for your
@@ -86,19 +86,19 @@ export default async function Home() {
         </section>
 
         {/* Categories Section */}
-        <section className="py-16 bg-muted/50">
+        <section className="bg-muted/50 py-16">
           <div className="container mx-auto px-4">
-            <div className="max-w-5xl mx-auto">
-              <h3 className="text-3xl font-bold mb-8 text-center">
+            <div className="mx-auto max-w-5xl">
+              <h3 className="mb-8 text-center font-bold text-3xl">
                 Browse by Category
               </h3>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 {featuredCategories.map((category) => (
                   <Link
-                    key={category.id}
                     href={`/commands?category=${category.slug}`}
+                    key={category.id}
                   >
-                    <Card className="h-full hover:border-primary/50 transition-colors cursor-pointer">
+                    <Card className="h-full cursor-pointer transition-colors hover:border-primary/50">
                       <CardHeader>
                         <CardTitle>{category.name}</CardTitle>
                         <CardDescription>
@@ -109,7 +109,7 @@ export default async function Home() {
                   </Link>
                 ))}
               </div>
-              <div className="text-center mt-8">
+              <div className="mt-8 text-center">
                 <Button asChild size="lg">
                   <Link href="/commands">View All Commands</Link>
                 </Button>
@@ -120,12 +120,12 @@ export default async function Home() {
       </main>
 
       <footer className="border-t py-8">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
+        <div className="container mx-auto px-4 text-center text-muted-foreground text-sm">
           <p>
             © 2025 Cursor Commands Explorer. Built with Next.js and Drizzle.
           </p>
         </div>
       </footer>
     </div>
-  );
+  )
 }

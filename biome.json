@@ -9,10 +9,6 @@
     }
   },
   "files": {
-    "includes": [
-      "**/*",
-      "!components/ui/*",
-      "!app/globals.css"
-    ]
+    "includes": ["**/*", "!components/ui/*", "!app/globals.css"]
   }
 }

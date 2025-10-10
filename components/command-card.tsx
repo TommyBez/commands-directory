@@ -1,21 +1,21 @@
-import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
+import Link from 'next/link'
+import { BookmarkButton } from '@/components/bookmark-button'
+import { Badge } from '@/components/ui/badge'
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { BookmarkButton } from "@/components/bookmark-button";
-import type { Command } from "@/db/schema";
+} from '@/components/ui/card'
+import type { Command } from '@/db/schema'
 
 interface CommandCardProps {
   command: Command & {
-    category?: { name: string; slug: string } | null;
-    tags?: Array<{ tag: { name: string; slug: string } }>;
-  };
-  isBookmarked?: boolean;
+    category?: { name: string; slug: string } | null
+    tags?: Array<{ tag: { name: string; slug: string } }>
+  }
+  isBookmarked?: boolean
 }
 
 export function CommandCard({
@@ -24,30 +24,30 @@ export function CommandCard({
 }: CommandCardProps) {
   // Extract a preview from content (first 150 chars)
   const contentPreview = command.content
-    ?.replace(/^#.*$/gm, "") // Remove headings
-    .replace(/\n+/g, " ") // Replace newlines with spaces
+    ?.replace(/^#.*$/gm, '') // Remove headings
+    .replace(/\n+/g, ' ') // Replace newlines with spaces
     .trim()
-    .slice(0, 150);
+    .slice(0, 150)
 
   return (
     <Link href={`/commands/${command.slug}`}>
-      <Card className="transition-all hover:shadow-md hover:border-primary/50 cursor-pointer relative group">
-        <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+      <Card className="group relative cursor-pointer transition-all hover:border-primary/50 hover:shadow-md">
+        <div className="absolute top-2 right-2 z-10 opacity-0 transition-opacity group-hover:opacity-100">
           <BookmarkButton
             commandId={command.id}
             initialBookmarked={isBookmarked}
           />
         </div>
         <CardHeader>
-          <CardTitle className="text-lg pr-8">{command.title}</CardTitle>
+          <CardTitle className="pr-8 text-lg">{command.title}</CardTitle>
           <CardDescription className="line-clamp-2">
             {command.description || contentPreview}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-2">
-          <div className="flex flex-wrap gap-2 items-center">
+          <div className="flex flex-wrap items-center gap-2">
             {command.category && (
-              <Badge variant="secondary" className="text-xs">
+              <Badge className="text-xs" variant="secondary">
                 {command.category.name}
               </Badge>
             )}
@@ -55,9 +55,9 @@ export function CommandCard({
               <div className="flex flex-wrap gap-1">
                 {command.tags.slice(0, 3).map((tagRel) => (
                   <Badge
+                    className="text-xs"
                     key={tagRel.tag.slug}
                     variant="outline"
-                    className="text-xs"
                   >
                     {tagRel.tag.name}
                   </Badge>
@@ -68,5 +68,5 @@ export function CommandCard({
         </CardContent>
       </Card>
     </Link>
-  );
+  )
 }

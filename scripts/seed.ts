@@ -1,75 +1,76 @@
-import dotenv from "dotenv";
-dotenv.config({ path: ".env.local" });
+import dotenv from 'dotenv'
 
-import { db } from "../db";
+dotenv.config({ path: '.env.local' })
+
+import { db } from '../db'
 import {
-  commands,
   categories,
-  commandTags,
+  commands,
   commandTagMap,
-  type NewCommand,
+  commandTags,
   type NewCategory,
+  type NewCommand,
   type NewCommandTag,
-} from "../db/schema";
+} from '../db/schema'
 
 async function seed() {
-  console.log("🌱 Seeding database...");
+  console.log('🌱 Seeding database...')
 
   // Seed Categories
   const categoryData: NewCategory[] = [
     {
-      name: "Development Workflow",
-      slug: "development-workflow",
-      description: "Commands for managing your development process",
+      name: 'Development Workflow',
+      slug: 'development-workflow',
+      description: 'Commands for managing your development process',
     },
     {
-      name: "Code Quality",
-      slug: "code-quality",
-      description: "Commands for reviewing and improving code quality",
+      name: 'Code Quality',
+      slug: 'code-quality',
+      description: 'Commands for reviewing and improving code quality',
     },
     {
-      name: "Testing",
-      slug: "testing",
-      description: "Commands for testing and debugging",
+      name: 'Testing',
+      slug: 'testing',
+      description: 'Commands for testing and debugging',
     },
     {
-      name: "Project Setup",
-      slug: "project-setup",
-      description: "Commands for setting up new features and projects",
+      name: 'Project Setup',
+      slug: 'project-setup',
+      description: 'Commands for setting up new features and projects',
     },
     {
-      name: "Team Collaboration",
-      slug: "team-collaboration",
-      description: "Commands for onboarding and collaboration",
+      name: 'Team Collaboration',
+      slug: 'team-collaboration',
+      description: 'Commands for onboarding and collaboration',
     },
-  ];
+  ]
 
-  console.log("Inserting categories...");
+  console.log('Inserting categories...')
   const insertedCategories = await db
     .insert(categories)
     .values(categoryData)
-    .returning();
+    .returning()
 
   // Seed Tags
   const tagData: NewCommandTag[] = [
-    { name: "Git", slug: "git" },
-    { name: "Review", slug: "review" },
-    { name: "Testing", slug: "testing" },
-    { name: "Security", slug: "security" },
-    { name: "Setup", slug: "setup" },
-    { name: "Documentation", slug: "documentation" },
-    { name: "Onboarding", slug: "onboarding" },
-  ];
+    { name: 'Git', slug: 'git' },
+    { name: 'Review', slug: 'review' },
+    { name: 'Testing', slug: 'testing' },
+    { name: 'Security', slug: 'security' },
+    { name: 'Setup', slug: 'setup' },
+    { name: 'Documentation', slug: 'documentation' },
+    { name: 'Onboarding', slug: 'onboarding' },
+  ]
 
-  console.log("Inserting tags...");
-  const insertedTags = await db.insert(commandTags).values(tagData).returning();
+  console.log('Inserting tags...')
+  const insertedTags = await db.insert(commandTags).values(tagData).returning()
 
   // Seed Commands with Markdown content
   const commandsData: NewCommand[] = [
     {
-      slug: "create-pull-request",
-      title: "Create Pull Request",
-      description: "Create a comprehensive pull request with proper context",
+      slug: 'create-pull-request',
+      title: 'Create Pull Request',
+      description: 'Create a comprehensive pull request with proper context',
       content: `# Create Pull Request
 
 ## Overview
@@ -106,9 +107,9 @@ Create a well-structured pull request with all necessary context and information
       categoryId: insertedCategories[0].id,
     },
     {
-      slug: "code-review-checklist",
-      title: "Code Review Checklist",
-      description: "Comprehensive checklist for reviewing code changes",
+      slug: 'code-review-checklist',
+      title: 'Code Review Checklist',
+      description: 'Comprehensive checklist for reviewing code changes',
       content: `# Code Review Checklist
 
 ## Overview
@@ -153,9 +154,9 @@ Systematic approach to reviewing pull requests and code changes.
       categoryId: insertedCategories[1].id,
     },
     {
-      slug: "run-tests-and-fix",
-      title: "Run All Tests and Fix Failures",
-      description: "Execute test suite and systematically fix any failures",
+      slug: 'run-tests-and-fix',
+      title: 'Run All Tests and Fix Failures',
+      description: 'Execute test suite and systematically fix any failures',
       content: `# Run All Tests and Fix Failures
 
 ## Overview
@@ -199,9 +200,9 @@ Run the complete test suite and fix any failing tests in a systematic way.
       categoryId: insertedCategories[2].id,
     },
     {
-      slug: "security-audit",
-      title: "Security Audit",
-      description: "Perform a comprehensive security audit of the codebase",
+      slug: 'security-audit',
+      title: 'Security Audit',
+      description: 'Perform a comprehensive security audit of the codebase',
       content: `# Security Audit
 
 ## Overview
@@ -253,9 +254,9 @@ Comprehensive security review of the codebase to identify and fix vulnerabilitie
       categoryId: insertedCategories[1].id,
     },
     {
-      slug: "setup-new-feature",
-      title: "Setup New Feature",
-      description: "Scaffold and set up a new feature with proper structure",
+      slug: 'setup-new-feature',
+      title: 'Setup New Feature',
+      description: 'Scaffold and set up a new feature with proper structure',
       content: `# Setup New Feature
 
 ## Overview
@@ -315,9 +316,9 @@ Create a well-structured foundation for a new feature following project conventi
       categoryId: insertedCategories[3].id,
     },
     {
-      slug: "onboard-new-developer",
-      title: "Onboard New Developer",
-      description: "Comprehensive onboarding process for new team members",
+      slug: 'onboard-new-developer',
+      title: 'Onboard New Developer',
+      description: 'Comprehensive onboarding process for new team members',
       content: `# Onboard New Developer
 
 ## Overview
@@ -382,10 +383,10 @@ Comprehensive onboarding process to get a new developer up and running quickly.
       categoryId: insertedCategories[4].id,
     },
     {
-      slug: "address-pr-comments",
-      title: "Address GitHub PR Comments",
+      slug: 'address-pr-comments',
+      title: 'Address GitHub PR Comments',
       description:
-        "Systematically address all review comments on a pull request",
+        'Systematically address all review comments on a pull request',
       content: `# Address GitHub PR Comments
 
 ## Overview
@@ -433,9 +434,9 @@ Efficiently respond to and resolve all review comments on your pull request.
       categoryId: insertedCategories[0].id,
     },
     {
-      slug: "light-code-review",
-      title: "Light Review of Existing Diffs",
-      description: "Quick review of existing code changes for obvious issues",
+      slug: 'light-code-review',
+      title: 'Light Review of Existing Diffs',
+      description: 'Quick review of existing code changes for obvious issues',
       content: `# Light Review of Existing Diffs
 
 ## Overview
@@ -478,13 +479,13 @@ Quick pass through existing diffs to catch obvious issues before detailed review
 - ❌ Needs major rework`,
       categoryId: insertedCategories[1].id,
     },
-  ];
+  ]
 
-  console.log("Inserting commands...");
+  console.log('Inserting commands...')
   const insertedCommands = await db
     .insert(commands)
     .values(commandsData)
-    .returning();
+    .returning()
 
   // Link commands to tags
   const tagMappings = [
@@ -496,27 +497,27 @@ Quick pass through existing diffs to catch obvious issues before detailed review
     { commandIndex: 5, tagIndex: 6 }, // Onboard Developer -> Onboarding
     { commandIndex: 6, tagIndex: 0 }, // Address PR -> Git
     { commandIndex: 7, tagIndex: 1 }, // Light Review -> Review
-  ];
+  ]
 
-  console.log("Linking commands to tags...");
+  console.log('Linking commands to tags...')
   await db.insert(commandTagMap).values(
     tagMappings.map((m) => ({
       commandId: insertedCommands[m.commandIndex].id,
       tagId: insertedTags[m.tagIndex].id,
     })),
-  );
+  )
 
-  console.log("✅ Seeding completed!");
-  console.log(`Created ${insertedCategories.length} categories`);
-  console.log(`Created ${insertedTags.length} tags`);
-  console.log(`Created ${insertedCommands.length} commands`);
+  console.log('✅ Seeding completed!')
+  console.log(`Created ${insertedCategories.length} categories`)
+  console.log(`Created ${insertedTags.length} tags`)
+  console.log(`Created ${insertedCommands.length} commands`)
 }
 
 seed()
   .catch((error) => {
-    console.error("❌ Seeding failed:", error);
-    process.exit(1);
+    console.error('❌ Seeding failed:', error)
+    process.exit(1)
   })
   .then(() => {
-    process.exit(0);
-  });
+    process.exit(0)
+  })

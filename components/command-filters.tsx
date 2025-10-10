@@ -1,47 +1,47 @@
-"use client";
+'use client'
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { XIcon } from 'lucide-react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { Button } from '@/components/ui/button'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { XIcon } from "lucide-react";
+} from '@/components/ui/select'
 
 export function CommandFilters() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const router = useRouter()
+  const searchParams = useSearchParams()
 
   const handleFilterChange = (key: string, value: string) => {
-    const params = new URLSearchParams(searchParams);
-    if (value && value !== "all") {
-      params.set(key, value);
+    const params = new URLSearchParams(searchParams)
+    if (value && value !== 'all') {
+      params.set(key, value)
     } else {
-      params.delete(key);
+      params.delete(key)
     }
-    params.delete("page"); // Reset to first page
-    router.push(`/commands?${params.toString()}`);
-  };
+    params.delete('page') // Reset to first page
+    router.push(`/commands?${params.toString()}`)
+  }
 
   const clearFilters = () => {
-    const params = new URLSearchParams();
-    const q = searchParams.get("q");
-    if (q) params.set("q", q);
-    router.push(`/commands?${params.toString()}`);
-  };
+    const params = new URLSearchParams()
+    const q = searchParams.get('q')
+    if (q) params.set('q', q)
+    router.push(`/commands?${params.toString()}`)
+  }
 
-  const hasFilters = searchParams.has("category") || searchParams.has("tag");
+  const hasFilters = searchParams.has('category') || searchParams.has('tag')
 
   return (
-    <div className="flex flex-wrap gap-4 items-end">
+    <div className="flex flex-wrap items-end gap-4">
       <div className="flex flex-col gap-2">
-        <span className="text-sm font-medium">Category</span>
+        <span className="font-medium text-sm">Category</span>
         <Select
-          value={searchParams.get("category") || "all"}
-          onValueChange={(value) => handleFilterChange("category", value)}
+          onValueChange={(value) => handleFilterChange('category', value)}
+          value={searchParams.get('category') || 'all'}
         >
           <SelectTrigger className="w-[200px]">
             <SelectValue placeholder="All Categories" />
@@ -62,10 +62,10 @@ export function CommandFilters() {
       </div>
 
       <div className="flex flex-col gap-2">
-        <span className="text-sm font-medium">Tag</span>
+        <span className="font-medium text-sm">Tag</span>
         <Select
-          value={searchParams.get("tag") || "all"}
-          onValueChange={(value) => handleFilterChange("tag", value)}
+          onValueChange={(value) => handleFilterChange('tag', value)}
+          value={searchParams.get('tag') || 'all'}
         >
           <SelectTrigger className="w-[200px]">
             <SelectValue placeholder="All Tags" />
@@ -84,11 +84,11 @@ export function CommandFilters() {
       </div>
 
       {hasFilters && (
-        <Button variant="outline" size="sm" onClick={clearFilters}>
-          <XIcon className="h-4 w-4 mr-2" />
+        <Button onClick={clearFilters} size="sm" variant="outline">
+          <XIcon className="mr-2 h-4 w-4" />
           Clear Filters
         </Button>
       )}
     </div>
-  );
+  )
 }

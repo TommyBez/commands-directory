@@ -1,13 +1,13 @@
-import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 
 export default function FavoritesLoading() {
   return (
-    <div className="min-h-screen flex flex-col">
-      <main className="flex-1 container mx-auto px-4 py-8">
-        <div className="max-w-5xl mx-auto space-y-8">
+    <div className="flex min-h-screen flex-col">
+      <main className="container mx-auto flex-1 px-4 py-8">
+        <div className="mx-auto max-w-5xl space-y-8">
           <div>
-            <Skeleton className="h-9 w-48 mb-2" />
+            <Skeleton className="mb-2 h-9 w-48" />
             <Skeleton className="h-5 w-72" />
           </div>
 
@@ -40,5 +40,5 @@ export default function FavoritesLoading() {
         </div>
       </main>
     </div>
-  );
+  )
 }

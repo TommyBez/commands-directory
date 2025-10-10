@@ -1,10 +1,10 @@
-import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 
 export default function CommandsLoading() {
   return (
-    <div className="min-h-screen flex flex-col">
-      <main className="flex-1 container mx-auto px-4 py-8">
+    <div className="flex min-h-screen flex-col">
+      <main className="container mx-auto flex-1 px-4 py-8">
         <div className="space-y-8">
           <div className="space-y-4">
             <Skeleton className="h-9 w-64" />
@@ -15,7 +15,7 @@ export default function CommandsLoading() {
             <Skeleton className="h-7 w-24" />
             <div className="flex flex-wrap gap-2">
               {Array.from({ length: 8 }, (_, i) => `filter-${i}`).map((key) => (
-                <Skeleton key={key} className="h-10 w-32" />
+                <Skeleton className="h-10 w-32" key={key} />
               ))}
             </div>
           </div>
@@ -58,5 +58,5 @@ export default function CommandsLoading() {
         </div>
       </main>
     </div>
-  );
+  )
 }
