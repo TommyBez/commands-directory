@@ -37,21 +37,16 @@ export default async function AdminCommandsPage() {
   }
 
   const baseUrl = process.env.NEXT_PUBLIC_API_URL
-  const cookies = await import('next/headers').then((mod) => mod.cookies())
-  const cookieHeader = cookies.toString()
 
   const [pendingRes, approvedRes, rejectedRes] = await Promise.all([
     fetch(`${baseUrl}/api/admin/commands?status=pending`, {
       cache: 'no-store',
-      headers: { Cookie: cookieHeader },
     }),
     fetch(`${baseUrl}/api/admin/commands?status=approved`, {
       cache: 'no-store',
-      headers: { Cookie: cookieHeader },
     }),
     fetch(`${baseUrl}/api/admin/commands?status=rejected`, {
       cache: 'no-store',
-      headers: { Cookie: cookieHeader },
     }),
   ])
 
