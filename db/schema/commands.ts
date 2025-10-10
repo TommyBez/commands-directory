@@ -10,6 +10,11 @@ export const commands = pgTable('commands', {
   description: text('description'),
   content: text('content').notNull(),
   categoryId: uuid('category_id').references(() => categories.id),
+  status: text('status').notNull().default('pending'), // 'pending' | 'approved' | 'rejected'
+  submittedByUserId: text('submitted_by_user_id'),
+  reviewedAt: timestamp('reviewed_at'),
+  reviewedByUserId: text('reviewed_by_user_id'),
+  rejectionReason: text('rejection_reason'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })
@@ -22,5 +27,6 @@ export const commandsRelations = relations(commands, ({ one, many }) => ({
   tags: many(commandTagMap),
 }))
 
+export type CommandStatus = 'pending' | 'approved' | 'rejected'
 export type Command = typeof commands.$inferSelect
 export type NewCommand = typeof commands.$inferInsert

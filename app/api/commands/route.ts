@@ -27,6 +27,9 @@ async function buildWhereConditions(
 ): Promise<SQL<unknown>[]> {
   const conditions: SQL<unknown>[] = []
 
+  // Only show approved commands in public listing
+  conditions.push(eq(commands.status, 'approved'))
+
   // Text search across title, description, and content
   if (q) {
     const searchCondition = or(
@@ -119,6 +122,30 @@ async function getBookmarkedCommandIds(
   return userBookmarks.map((b) => b.commandId)
 }
 
+function generateSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+
+async function generateUniqueSlug(baseTitle: string): Promise<string> {
+  let slug = generateSlug(baseTitle)
+  let counter = 2
+
+  // Check if slug exists
+  while (true) {
+    const existing = await db.query.commands.findFirst({
+      where: eq(commands.slug, slug),
+    })
+    if (!existing) {
+      return slug
+    }
+    slug = `${generateSlug(baseTitle)}-${counter}`
+    counter++
+  }
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { userId } = await auth()
@@ -155,6 +182,100 @@ export async function GET(request: NextRequest) {
     logger.error('Error fetching commands:', error)
     return NextResponse.json(
       { error: 'Failed to fetch commands' },
+      { status: 500 },
+    )
+  }
+}
+
+const MAX_TITLE_LENGTH = 200
+const MAX_DESCRIPTION_LENGTH = 500
+const MAX_CONTENT_LENGTH = 10_000
+
+export async function POST(request: NextRequest) {
+  try {
+    const { userId } = await auth()
+
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const body = await request.json()
+    const { title, description, content, categoryId } = body
+
+    // Validation
+    if (!title || typeof title !== 'string' || title.trim().length === 0) {
+      return NextResponse.json({ error: 'Title is required' }, { status: 400 })
+    }
+
+    if (
+      !content ||
+      typeof content !== 'string' ||
+      content.trim().length === 0
+    ) {
+      return NextResponse.json(
+        { error: 'Content is required' },
+        { status: 400 },
+      )
+    }
+
+    if (title.length > MAX_TITLE_LENGTH) {
+      return NextResponse.json(
+        { error: `Title must be ${MAX_TITLE_LENGTH} characters or less` },
+        { status: 400 },
+      )
+    }
+
+    if (description && description.length > MAX_DESCRIPTION_LENGTH) {
+      return NextResponse.json(
+        {
+          error: `Description must be ${MAX_DESCRIPTION_LENGTH} characters or less`,
+        },
+        { status: 400 },
+      )
+    }
+
+    if (content.length > MAX_CONTENT_LENGTH) {
+      return NextResponse.json(
+        { error: `Content must be ${MAX_CONTENT_LENGTH} characters or less` },
+        { status: 400 },
+      )
+    }
+
+    // Validate category if provided
+    if (categoryId) {
+      const category = await db.query.categories.findFirst({
+        where: eq(categories.id, categoryId),
+      })
+      if (!category) {
+        return NextResponse.json({ error: 'Invalid category' }, { status: 400 })
+      }
+    }
+
+    // Generate unique slug
+    const slug = await generateUniqueSlug(title)
+
+    // Insert command with pending status
+    const [newCommand] = await db
+      .insert(commands)
+      .values({
+        title: title.trim(),
+        description: description?.trim() || null,
+        content: content.trim(),
+        categoryId: categoryId || null,
+        slug,
+        status: 'pending',
+        submittedByUserId: userId,
+      })
+      .returning()
+
+    return NextResponse.json(
+      { data: newCommand, message: 'Command submitted successfully' },
+      { status: 201 },
+    )
+  } catch (error) {
+    logger.error('Error creating command:', error)
+    return NextResponse.json(
+      { error: 'Failed to create command' },
       { status: 500 },
     )
   }

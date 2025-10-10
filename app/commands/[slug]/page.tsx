@@ -118,7 +118,7 @@ export default async function CommandDetailPage({ params }: PageProps) {
                   <div className="grid gap-4 md:grid-cols-2">
                     {related
                       .slice(0, MAX_RELATED_COMMANDS)
-                      .map((cmd: { id: string; isBookmarked?: boolean }) => (
+                      .map((cmd: typeof command) => (
                         <CommandCard
                           command={cmd}
                           isBookmarked={cmd.isBookmarked}

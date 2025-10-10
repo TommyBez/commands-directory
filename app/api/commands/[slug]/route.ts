@@ -1,10 +1,11 @@
 import { auth } from '@clerk/nextjs/server'
-import { eq } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { db } from '@/db'
 import { bookmarks } from '@/db/schema/bookmarks'
 import { commands } from '@/db/schema/commands'
+import { userProfiles } from '@/db/schema/user-profiles'
 import { logger } from '@/lib/logger'
 
 export async function GET(
@@ -31,10 +32,33 @@ export async function GET(
       return NextResponse.json({ error: 'Command not found' }, { status: 404 })
     }
 
-    // Find related commands (same category or tags)
+    // Check visibility: approved OR (user is owner OR admin)
+    const isApproved = command.status === 'approved'
+
+    let canView = isApproved
+    if (!canView && userId) {
+      const isOwner = command.submittedByUserId === userId
+      if (isOwner) {
+        canView = true
+      } else {
+        const profile = await db.query.userProfiles.findFirst({
+          where: eq(userProfiles.userId, userId),
+        })
+        canView = profile?.role === 'admin'
+      }
+    }
+
+    if (!canView) {
+      return NextResponse.json({ error: 'Command not found' }, { status: 404 })
+    }
+
+    // Find related commands (same category or tags, only approved)
     const relatedCommands = command.categoryId
       ? await db.query.commands.findMany({
-          where: eq(commands.categoryId, command.categoryId),
+          where: and(
+            eq(commands.categoryId, command.categoryId),
+            eq(commands.status, 'approved'),
+          ),
           limit: 5,
           with: {
             category: true,
