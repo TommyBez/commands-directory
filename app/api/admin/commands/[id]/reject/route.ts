@@ -9,7 +9,7 @@ import { logger } from '@/lib/logger'
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
+  { params }: RouteContext<'/api/admin/commands/[id]/reject'>,
 ) {
   try {
     const { userId } = await auth()

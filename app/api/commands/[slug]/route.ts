@@ -10,7 +10,7 @@ import { logger } from '@/lib/logger'
 
 export async function GET(
   _request: NextRequest,
-  { params }: { params: Promise<{ slug: string }> },
+  { params }: RouteContext<'/api/commands/[slug]'>
 ) {
   try {
     const { userId } = await auth()
