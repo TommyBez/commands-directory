@@ -82,7 +82,9 @@ export function AppSidebar({ isAdmin = false }: AppSidebarProps) {
                 <CommandIcon className="h-6 w-6" />
                 <div className="flex flex-col gap-0.5 leading-none">
                   <span className="font-semibold">Commands</span>
-                  <span className="text-muted-foreground text-xs">Explorer</span>
+                  <span className="text-muted-foreground text-xs">
+                    Explorer
+                  </span>
                 </div>
               </Link>
             </SidebarMenuButton>
@@ -185,7 +187,7 @@ export function AppSidebar({ isAdmin = false }: AppSidebarProps) {
                     },
                   }}
                 />
-                <span className="flex-1 truncate text-sm font-medium group-data-[collapsible=icon]:hidden">
+                <span className="flex-1 truncate font-medium text-sm group-data-[collapsible=icon]:hidden">
                   Account
                 </span>
               </div>

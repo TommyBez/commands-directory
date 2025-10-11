@@ -1,6 +1,7 @@
 import { auth } from '@clerk/nextjs/server'
 import { and, eq } from 'drizzle-orm'
 import { FlagIcon } from 'lucide-react'
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { BookmarkButton } from '@/components/bookmark-button'
@@ -19,6 +20,43 @@ const MAX_RELATED_COMMANDS = 4
 
 type PageProps = {
   params: Promise<{ slug: string }>
+}
+
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
+  const { slug } = await params
+
+  const command = await db.query.commands.findFirst({
+    where: eq(commands.slug, slug),
+    with: {
+      category: true,
+    },
+  })
+
+  if (!command) {
+    return {
+      title: 'Command Not Found',
+    }
+  }
+
+  const description =
+    command.description || `Discover the ${command.title} command for Cursor.`
+
+  return {
+    title: command.title,
+    description,
+    openGraph: {
+      title: `${command.title} - Cursor Commands Explorer`,
+      description,
+      type: 'article',
+    },
+    twitter: {
+      card: 'summary',
+      title: command.title,
+      description,
+    },
+  }
 }
 
 export default async function CommandDetailPage({ params }: PageProps) {
@@ -107,64 +145,71 @@ export default async function CommandDetailPage({ params }: PageProps) {
 
   return (
     <main className="container mx-auto flex-1 px-4 py-6 sm:py-8">
-        <div className="mx-auto max-w-4xl space-y-6 sm:space-y-8">
-          {/* Breadcrumb */}
-          <div className="text-muted-foreground text-xs sm:text-sm">
-            <Link className="hover:text-foreground" href="/commands">
-              Commands
-            </Link>
-            {' / '}
-            <span className="truncate text-foreground">{commandWithBookmark.title}</span>
+      <div className="mx-auto max-w-4xl space-y-6 sm:space-y-8">
+        {/* Breadcrumb */}
+        <div className="text-muted-foreground text-xs sm:text-sm">
+          <Link className="hover:text-foreground" href="/commands">
+            Commands
+          </Link>
+          {' / '}
+          <span className="truncate text-foreground">
+            {commandWithBookmark.title}
+          </span>
+        </div>
+
+        {/* Main Content */}
+        <div className="space-y-6">
+          <div className="space-y-4">
+            <div>
+              <h1 className="mb-3 font-bold text-2xl leading-tight sm:mb-4 sm:text-3xl md:text-4xl">
+                {commandWithBookmark.title}
+              </h1>
+              {commandWithBookmark.description && (
+                <p className="text-base text-muted-foreground sm:text-lg md:text-xl">
+                  {commandWithBookmark.description}
+                </p>
+              )}
+            </div>
+            <div className="flex flex-col gap-2 sm:flex-row sm:gap-2">
+              <BookmarkButton
+                commandId={commandWithBookmark.id}
+                initialBookmarked={commandWithBookmark.isBookmarked}
+                showText={true}
+                size="default"
+                variant="outline"
+              />
+              <CopyCommandButton content={commandWithBookmark.content} />
+            </div>
           </div>
 
-          {/* Main Content */}
-          <div className="space-y-6">
-            <div className="space-y-4">
-              <div>
-                <h1 className="mb-3 font-bold text-2xl leading-tight sm:mb-4 sm:text-3xl md:text-4xl">
-                  {commandWithBookmark.title}
-                </h1>
-                {commandWithBookmark.description && (
-                  <p className="text-base text-muted-foreground sm:text-lg md:text-xl">
-                    {commandWithBookmark.description}
-                  </p>
-                )}
+          {/* Command Content */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Command Details</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="prose prose-slate dark:prose-invert max-w-none">
+                <pre className="overflow-x-auto whitespace-pre-wrap rounded-md bg-muted p-4">
+                  {commandWithBookmark.content}
+                </pre>
               </div>
-              <div className="flex flex-col gap-2 sm:flex-row sm:gap-2">
-                <BookmarkButton
-                  commandId={commandWithBookmark.id}
-                  initialBookmarked={commandWithBookmark.isBookmarked}
-                  showText={true}
-                  size="default"
-                  variant="outline"
-                />
-                <CopyCommandButton content={commandWithBookmark.content} />
+            </CardContent>
+          </Card>
+
+          {/* Metadata */}
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
+            {commandWithBookmark.category && (
+              <div className="flex items-center gap-2">
+                <span className="font-medium text-xs sm:text-sm">
+                  Category:
+                </span>
+                <Badge variant="secondary">
+                  {commandWithBookmark.category.name}
+                </Badge>
               </div>
-            </div>
-
-            {/* Command Content */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Command Details</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="prose prose-slate dark:prose-invert max-w-none">
-                  <pre className="overflow-x-auto whitespace-pre-wrap rounded-md bg-muted p-4">
-                    {commandWithBookmark.content}
-                  </pre>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Metadata */}
-            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
-              {commandWithBookmark.category && (
-                <div className="flex items-center gap-2">
-                  <span className="font-medium text-xs sm:text-sm">Category:</span>
-                  <Badge variant="secondary">{commandWithBookmark.category.name}</Badge>
-                </div>
-              )}
-              {commandWithBookmark.tags && commandWithBookmark.tags.length > 0 && (
+            )}
+            {commandWithBookmark.tags &&
+              commandWithBookmark.tags.length > 0 && (
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="font-medium text-xs sm:text-sm">Tags:</span>
                   {commandWithBookmark.tags.map(
@@ -176,39 +221,39 @@ export default async function CommandDetailPage({ params }: PageProps) {
                   )}
                 </div>
               )}
-            </div>
-
-            {/* Actions */}
-            <div className="flex gap-2">
-              <Button className="flex-1" size="sm" variant="outline">
-                <FlagIcon className="mr-2 h-4 w-4" />
-                <span className="hidden sm:inline">Report Issue</span>
-                <span className="sm:hidden">Report</span>
-              </Button>
-            </div>
-
-            {/* Related Commands */}
-            {related && related.length > 0 && (
-              <>
-                <Separator />
-                <div className="space-y-4">
-                  <h2 className="font-bold text-xl sm:text-2xl">Related Commands</h2>
-                  <div className="grid gap-3 sm:gap-4 sm:grid-cols-2">
-                    {related
-                      .slice(0, MAX_RELATED_COMMANDS)
-                      .map((cmd) => (
-                        <CommandCard
-                          command={cmd}
-                          isBookmarked={cmd.isBookmarked}
-                          key={cmd.id}
-                        />
-                      ))}
-                  </div>
-                </div>
-              </>
-            )}
           </div>
+
+          {/* Actions */}
+          <div className="flex gap-2">
+            <Button className="flex-1" size="sm" variant="outline">
+              <FlagIcon className="mr-2 h-4 w-4" />
+              <span className="hidden sm:inline">Report Issue</span>
+              <span className="sm:hidden">Report</span>
+            </Button>
+          </div>
+
+          {/* Related Commands */}
+          {related && related.length > 0 && (
+            <>
+              <Separator />
+              <div className="space-y-4">
+                <h2 className="font-bold text-xl sm:text-2xl">
+                  Related Commands
+                </h2>
+                <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
+                  {related.slice(0, MAX_RELATED_COMMANDS).map((cmd) => (
+                    <CommandCard
+                      command={cmd}
+                      isBookmarked={cmd.isBookmarked}
+                      key={cmd.id}
+                    />
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
         </div>
+      </div>
     </main>
   )
 }

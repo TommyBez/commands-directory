@@ -1,5 +1,6 @@
 import { auth } from '@clerk/nextjs/server'
-import { and, eq, ilike, inArray, or, sql, type SQL } from 'drizzle-orm'
+import { and, eq, ilike, inArray, or, type SQL, sql } from 'drizzle-orm'
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { CommandCard } from '@/components/command-card'
 import { CommandFilters } from '@/components/command-filters'
@@ -10,7 +11,17 @@ import { bookmarks } from '@/db/schema/bookmarks'
 import { categories } from '@/db/schema/categories'
 import { commandTagMap, commandTags } from '@/db/schema/command-tags'
 import { commands } from '@/db/schema/commands'
-import type { Command } from '@/db/schema/commands'
+
+export const metadata: Metadata = {
+  title: 'Browse Commands',
+  description:
+    'Search and discover Cursor commands. Filter by category and tags to find the perfect command for your workflow.',
+  openGraph: {
+    title: 'Browse Commands - Cursor Commands Explorer',
+    description:
+      'Search and discover Cursor commands. Filter by category and tags to find the perfect command for your workflow.',
+  },
+}
 
 type PageProps = {
   searchParams: Promise<{
@@ -19,12 +30,6 @@ type PageProps = {
     tag?: string
     page?: string
   }>
-}
-
-type CommandWithRelations = Command & {
-  category?: { name: string; slug: string } | null
-  tags?: Array<{ tag: { name: string; slug: string } }>
-  isBookmarked?: boolean
 }
 
 export default async function CommandsPage({ searchParams }: PageProps) {
@@ -137,70 +142,70 @@ export default async function CommandsPage({ searchParams }: PageProps) {
 
   return (
     <main className="container mx-auto flex-1 px-4 py-6 sm:py-8">
-        <div className="space-y-6 sm:space-y-8">
-          <div className="space-y-3 sm:space-y-4">
-            <h2 className="font-bold text-2xl sm:text-3xl">Search Commands</h2>
-            <SearchBar />
+      <div className="space-y-6 sm:space-y-8">
+        <div className="space-y-3 sm:space-y-4">
+          <h2 className="font-bold text-2xl sm:text-3xl">Search Commands</h2>
+          <SearchBar />
+        </div>
+
+        <div className="space-y-3 sm:space-y-4">
+          <h3 className="font-semibold text-base sm:text-lg">Filters</h3>
+          <CommandFilters />
+        </div>
+
+        <div className="space-y-4">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-muted-foreground text-sm">
+              Found {pagination.total} command
+              {pagination.total !== 1 ? 's' : ''}
+            </p>
+            <p className="text-muted-foreground text-sm">
+              Page {pagination.page} of {pagination.totalPages}
+            </p>
           </div>
 
-          <div className="space-y-3 sm:space-y-4">
-            <h3 className="font-semibold text-base sm:text-lg">Filters</h3>
-            <CommandFilters />
-          </div>
-
-          <div className="space-y-4">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-muted-foreground text-sm">
-                Found {pagination.total} command
-                {pagination.total !== 1 ? 's' : ''}
-              </p>
-              <p className="text-muted-foreground text-sm">
-                Page {pagination.page} of {pagination.totalPages}
+          {commandsWithBookmarks.length === 0 ? (
+            <div className="py-12 text-center">
+              <p className="text-muted-foreground">
+                No commands found. Try adjusting your filters.
               </p>
             </div>
+          ) : (
+            <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
+              {commandsWithBookmarks.map((command) => (
+                <CommandCard
+                  command={command}
+                  isBookmarked={command.isBookmarked}
+                  key={command.id}
+                />
+              ))}
+            </div>
+          )}
 
-            {commandsWithBookmarks.length === 0 ? (
-              <div className="py-12 text-center">
-                <p className="text-muted-foreground">
-                  No commands found. Try adjusting your filters.
-                </p>
-              </div>
-            ) : (
-              <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {commandsWithBookmarks.map((command) => (
-                  <CommandCard
-                    command={command}
-                    isBookmarked={command.isBookmarked}
-                    key={command.id}
-                  />
-                ))}
-              </div>
-            )}
-
-            {pagination.totalPages > 1 && (
-              <div className="flex flex-col gap-2 pt-6 sm:flex-row sm:justify-center sm:gap-2 sm:pt-8">
-                {pagination.page > 1 && (
-                  <Button asChild className="w-full sm:w-auto" variant="outline">
-                    <Link
-                      href={`/commands?${new URLSearchParams({ ...params, page: String(pagination.page - 1) }).toString()}`}
-                    >
-                      Previous
-                    </Link>
-                  </Button>
-                )}
-                {pagination.page < pagination.totalPages && (
-                  <Button asChild className="w-full sm:w-auto" variant="outline">
-                    <Link
-                      href={`/commands?${new URLSearchParams({ ...params, page: String(pagination.page + 1) }).toString()}`}
-                    >
-                      Next
-                    </Link>
-                  </Button>
-                )}
-              </div>
-            )}
-          </div>
+          {pagination.totalPages > 1 && (
+            <div className="flex flex-col gap-2 pt-6 sm:flex-row sm:justify-center sm:gap-2 sm:pt-8">
+              {pagination.page > 1 && (
+                <Button asChild className="w-full sm:w-auto" variant="outline">
+                  <Link
+                    href={`/commands?${new URLSearchParams({ ...params, page: String(pagination.page - 1) }).toString()}`}
+                  >
+                    Previous
+                  </Link>
+                </Button>
+              )}
+              {pagination.page < pagination.totalPages && (
+                <Button asChild className="w-full sm:w-auto" variant="outline">
+                  <Link
+                    href={`/commands?${new URLSearchParams({ ...params, page: String(pagination.page + 1) }).toString()}`}
+                  >
+                    Next
+                  </Link>
+                </Button>
+              )}
+            </div>
+          )}
         </div>
+      </div>
     </main>
   )
 }
