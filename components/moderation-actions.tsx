@@ -28,7 +28,9 @@ export function ModerationActions({
   const router = useRouter()
   const [isApproving, setIsApproving] = useState(false)
   const [isRejecting, setIsRejecting] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [rejectionReason, setRejectionReason] = useState('')
   const [error, setError] = useState<string | null>(null)
 
@@ -83,6 +85,30 @@ export function ModerationActions({
       setError(err instanceof Error ? err.message : 'Failed to reject command')
     } finally {
       setIsRejecting(false)
+    }
+  }
+
+  const handleDelete = async () => {
+    setIsDeleting(true)
+    setError(null)
+
+    try {
+      const response = await fetch(`/api/admin/commands/${commandId}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'Failed to delete command')
+      }
+
+      setDeleteDialogOpen(false)
+      router.refresh()
+    } catch (err) {
+      logger.error('Error deleting command:', err)
+      setError(err instanceof Error ? err.message : 'Failed to delete command')
+    } finally {
+      setIsDeleting(false)
     }
   }
 
@@ -220,6 +246,44 @@ export function ModerationActions({
             </DialogContent>
           </Dialog>
         )}
+
+        <Dialog onOpenChange={setDeleteDialogOpen} open={deleteDialogOpen}>
+          <DialogTrigger asChild>
+            <Button
+              className="flex-1 sm:flex-initial"
+              type="button"
+              variant="outline"
+            >
+              Delete
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Delete Command</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to permanently delete this command? This
+                action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button
+                onClick={() => setDeleteDialogOpen(false)}
+                type="button"
+                variant="outline"
+              >
+                Cancel
+              </Button>
+              <Button
+                disabled={isDeleting}
+                onClick={handleDelete}
+                type="button"
+                variant="destructive"
+              >
+                {isDeleting ? 'Deleting...' : 'Delete Command'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )
