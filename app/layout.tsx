@@ -2,6 +2,7 @@ import { ClerkProvider } from '@clerk/nextjs'
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { ThemeProvider } from 'next-themes'
+import { Analytics } from '@vercel/analytics/next'
 import { AppSidebarWrapper } from '@/components/app-sidebar-wrapper'
 import { Footer } from '@/components/footer'
 import { Header } from '@/components/header'
@@ -53,6 +54,7 @@ export default function RootLayout({
               </SidebarInset>
             </SidebarProvider>
           </ThemeProvider>
+          <Analytics />
         </body>
       </html>
     </ClerkProvider>
