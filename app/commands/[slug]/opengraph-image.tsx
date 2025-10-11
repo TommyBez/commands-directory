@@ -3,8 +3,6 @@ import { eq } from 'drizzle-orm'
 import { db } from '@/db'
 import { commands } from '@/db/schema/commands'
 
-export const runtime = 'edge'
-
 export const alt = 'Command Detail - Cursor Commands Explorer'
 export const size = {
   width: 1200,
