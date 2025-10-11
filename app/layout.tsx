@@ -26,14 +26,17 @@ export const metadata: Metadata = {
     template: '%s | Cursor Commands Explorer',
   },
   description:
-    'Discover, search, and master keyboard-driven commands for Cursor. Copy-ready command snippets shared by the community.',
+    "Copy-ready Cursor commands, shared by the community. Discover proven command snippets for Cursor's AI agent—search, preview, and paste in seconds to speed up your next task.",
   keywords: [
     'cursor',
-    'commands',
-    'keyboard shortcuts',
-    'productivity',
-    'developer tools',
+    'cursor ai',
+    'cursor commands',
+    'ai prompts',
+    'cursor agent',
     'code editor',
+    'developer tools',
+    'productivity',
+    'ai assistant',
   ],
   authors: [{ name: 'Cursor Commands Explorer' }],
   creator: 'Cursor Commands Explorer',
@@ -44,13 +47,13 @@ export const metadata: Metadata = {
     siteName: 'Cursor Commands Explorer',
     title: 'Cursor Commands Explorer',
     description:
-      'Discover, search, and master keyboard-driven commands for Cursor. Copy-ready command snippets shared by the community.',
+      "Copy-ready Cursor commands, shared by the community. Discover proven command snippets for Cursor's AI agent—search, preview, and paste in seconds.",
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Cursor Commands Explorer',
     description:
-      'Discover, search, and master keyboard-driven commands for Cursor. Copy-ready command snippets shared by the community.',
+      "Copy-ready Cursor commands, shared by the community. Discover proven command snippets for Cursor's AI agent—search, preview, and paste in seconds.",
   },
   robots: {
     index: true,
