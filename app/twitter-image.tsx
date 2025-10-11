@@ -12,7 +12,7 @@ export default async function Image() {
     (
       <div
         style={{
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          background: '#0a0a0a',
           width: '100%',
           height: '100%',
           display: 'flex',
@@ -35,9 +35,8 @@ export default async function Image() {
             style={{
               fontSize: 72,
               fontWeight: 'bold',
-              color: 'white',
+              color: '#ffffff',
               marginBottom: 24,
-              textShadow: '0 4px 12px rgba(0,0,0,0.3)',
             }}
           >
             Cursor Commands Explorer
@@ -45,7 +44,7 @@ export default async function Image() {
           <div
             style={{
               fontSize: 36,
-              color: 'rgba(255,255,255,0.95)',
+              color: '#a1a1aa',
               marginBottom: 48,
               maxWidth: 900,
               lineHeight: 1.4,
@@ -58,19 +57,40 @@ export default async function Image() {
               display: 'flex',
               gap: 40,
               fontSize: 24,
-              color: 'rgba(255,255,255,0.9)',
+              color: '#71717a',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div style={{ fontSize: 32 }}>🔍</div>
+              <div
+                style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: '50%',
+                  background: '#3b82f6',
+                }}
+              />
               <div>Search & Discover</div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div style={{ fontSize: 32 }}>⚡</div>
+              <div
+                style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: '50%',
+                  background: '#3b82f6',
+                }}
+              />
               <div>One-Click Copy</div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div style={{ fontSize: 32 }}>🎯</div>
+              <div
+                style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: '50%',
+                  background: '#3b82f6',
+                }}
+              />
               <div>Community Curated</div>
             </div>
           </div>

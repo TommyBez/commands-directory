@@ -12,7 +12,7 @@ export default async function Image() {
     (
       <div
         style={{
-          background: 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)',
+          background: '#0a0a0a',
           width: '100%',
           height: '100%',
           display: 'flex',
@@ -33,19 +33,10 @@ export default async function Image() {
         >
           <div
             style={{
-              fontSize: 96,
-              marginBottom: 40,
-            }}
-          >
-            📝
-          </div>
-          <div
-            style={{
               fontSize: 80,
               fontWeight: 'bold',
-              color: 'white',
+              color: '#ffffff',
               marginBottom: 32,
-              textShadow: '0 4px 12px rgba(0,0,0,0.3)',
             }}
           >
             My Submissions
@@ -53,7 +44,7 @@ export default async function Image() {
           <div
             style={{
               fontSize: 38,
-              color: 'rgba(255,255,255,0.95)',
+              color: '#a1a1aa',
               marginBottom: 60,
               maxWidth: 900,
               lineHeight: 1.4,
@@ -66,7 +57,7 @@ export default async function Image() {
               display: 'flex',
               gap: 32,
               fontSize: 28,
-              color: 'rgba(255,255,255,0.9)',
+              color: '#71717a',
             }}
           >
             <div
@@ -74,12 +65,19 @@ export default async function Image() {
                 display: 'flex',
                 alignItems: 'center',
                 gap: 12,
-                background: 'rgba(255,255,255,0.2)',
+                background: '#18181b',
                 padding: '16px 28px',
                 borderRadius: 12,
               }}
             >
-              <div style={{ fontSize: 36 }}>✅</div>
+              <div
+                style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: '50%',
+                  background: '#3b82f6',
+                }}
+              />
               <div>Track Status</div>
             </div>
             <div
@@ -87,12 +85,19 @@ export default async function Image() {
                 display: 'flex',
                 alignItems: 'center',
                 gap: 12,
-                background: 'rgba(255,255,255,0.2)',
+                background: '#18181b',
                 padding: '16px 28px',
                 borderRadius: 12,
               }}
             >
-              <div style={{ fontSize: 36 }}>📊</div>
+              <div
+                style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: '50%',
+                  background: '#3b82f6',
+                }}
+              />
               <div>View Progress</div>
             </div>
           </div>

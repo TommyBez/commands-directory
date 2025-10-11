@@ -33,7 +33,7 @@ export default async function Image({ params }: Props) {
     (
       <div
         style={{
-          background: 'linear-gradient(135deg, #2563eb 0%, #7c3aed 100%)',
+          background: '#0a0a0a',
           width: '100%',
           height: '100%',
           display: 'flex',
@@ -54,7 +54,7 @@ export default async function Image({ params }: Props) {
             <div
               style={{
                 fontSize: 28,
-                color: 'rgba(255,255,255,0.8)',
+                color: '#71717a',
                 marginBottom: 16,
                 display: 'flex',
                 alignItems: 'center',
@@ -63,9 +63,10 @@ export default async function Image({ params }: Props) {
             >
               <div
                 style={{
-                  background: 'rgba(255,255,255,0.2)',
+                  background: '#18181b',
                   padding: '8px 20px',
                   borderRadius: 8,
+                  border: '1px solid #27272a',
                 }}
               >
                 {categoryName}
@@ -76,9 +77,8 @@ export default async function Image({ params }: Props) {
             style={{
               fontSize: 72,
               fontWeight: 'bold',
-              color: 'white',
+              color: '#ffffff',
               marginBottom: 24,
-              textShadow: '0 4px 12px rgba(0,0,0,0.3)',
               lineHeight: 1.2,
               maxWidth: 1000,
             }}
@@ -89,7 +89,7 @@ export default async function Image({ params }: Props) {
             <div
               style={{
                 fontSize: 32,
-                color: 'rgba(255,255,255,0.9)',
+                color: '#a1a1aa',
                 lineHeight: 1.4,
                 maxWidth: 900,
               }}
@@ -106,10 +106,17 @@ export default async function Image({ params }: Props) {
             alignItems: 'center',
             gap: 16,
             fontSize: 28,
-            color: 'rgba(255,255,255,0.9)',
+            color: '#71717a',
           }}
         >
-          <div style={{ fontSize: 36 }}>📋</div>
+          <div
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: '50%',
+              background: '#3b82f6',
+            }}
+          />
           <div>Cursor Commands Explorer</div>
         </div>
       </div>
