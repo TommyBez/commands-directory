@@ -1,4 +1,4 @@
-import { eq, sql } from 'drizzle-orm'
+import { eq } from 'drizzle-orm'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { db } from '@/db'
@@ -7,44 +7,43 @@ import { logger } from '@/lib/logger'
 
 /**
  * GET /api/registry
- * Returns a list of all available registry items (approved commands)
+ * Returns the complete registry following the registry.json schema
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
-    const searchParams = request.nextUrl.searchParams
-    const page = Number.parseInt(searchParams.get('page') || '1', 10)
-    const limit = Number.parseInt(searchParams.get('limit') || '100', 10)
-    const offset = (page - 1) * limit
+    // Get the base URL for file references
+    const baseUrl =
+      process.env.NEXT_PUBLIC_APP_URL ||
+      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
+      'http://localhost:3000'
 
-    // Fetch approved commands with their relationships
-    const [approvedCommands, totalCount] = await Promise.all([
-      db.query.commands.findMany({
-        where: eq(commands.status, 'approved'),
-        limit,
-        offset,
-        with: {
-          category: true,
-          tags: {
-            with: {
-              tag: true,
-            },
+    // Fetch all approved commands with their relationships
+    const approvedCommands = await db.query.commands.findMany({
+      where: eq(commands.status, 'approved'),
+      with: {
+        category: true,
+        tags: {
+          with: {
+            tag: true,
           },
         },
-        orderBy: (table, { desc }) => [desc(table.createdAt)],
-      }),
-      db
-        .select({ count: sql<number>`count(*)` })
-        .from(commands)
-        .where(eq(commands.status, 'approved'))
-        .then((res) => Number(res[0]?.count || 0)),
-    ])
+      },
+      orderBy: (table, { desc }) => [desc(table.createdAt)],
+    })
 
-    // Transform commands into registry items
+    // Transform commands into full registry items following registry-item.json schema
     const registryItems = approvedCommands.map((command) => ({
       name: command.slug,
       type: 'registry:file' as const,
       title: command.title,
       description: command.description || undefined,
+      files: [
+        {
+          path: `${baseUrl}/api/registry/files/${command.slug}`,
+          type: 'registry:file' as const,
+          target: `.cursor/commands/${command.slug}.md`,
+        },
+      ],
       categories: command.category
         ? [command.category.slug]
         : command.tags.length > 0
@@ -60,30 +59,29 @@ export async function GET(request: NextRequest) {
         createdAt: command.createdAt.toISOString(),
         updatedAt: command.updatedAt.toISOString(),
       },
+      docs: command.description
+        ? `# ${command.title}\n\n${command.description}\n\n## Installation\n\nThis command will be installed to \`.cursor/commands/${command.slug}.md\``
+        : undefined,
     }))
 
-    return NextResponse.json(
-      {
-        items: registryItems,
-        pagination: {
-          page,
-          limit,
-          total: totalCount,
-          totalPages: Math.ceil(totalCount / limit),
-        },
+    // Build the complete registry following registry.json schema
+    const registry = {
+      $schema: 'https://ui.shadcn.com/schema/registry.json',
+      name: 'cursor-commands',
+      homepage: baseUrl,
+      items: registryItems,
+    }
+
+    return NextResponse.json(registry, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
       },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'Cache-Control':
-            'public, s-maxage=3600, stale-while-revalidate=86400',
-        },
-      },
-    )
+    })
   } catch (error) {
-    logger.error('Error fetching registry items:', error)
+    logger.error('Error fetching registry:', error)
     return NextResponse.json(
-      { error: 'Failed to fetch registry items' },
+      { error: 'Failed to fetch registry' },
       { status: 500 },
     )
   }
