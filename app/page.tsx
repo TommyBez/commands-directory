@@ -1,4 +1,5 @@
 import { BookmarkIcon, SearchIcon, ZapIcon } from 'lucide-react'
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Suspense } from 'react'
 import { OnboardingModal } from '@/components/onboarding-modal'
@@ -11,6 +12,17 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { db } from '@/db'
+
+export const metadata: Metadata = {
+  title: 'Home',
+  description:
+    "Copy-ready Cursor commands, shared by the community. Discover proven command snippets for Cursor's agent—search, preview, and paste in seconds.",
+  openGraph: {
+    title: 'Cursor Commands Explorer - Home',
+    description:
+      "Copy-ready Cursor commands, shared by the community. Discover proven command snippets for Cursor's agent—search, preview, and paste in seconds.",
+  },
+}
 
 export default async function Home() {
   const featuredCategories = await db.query.categories.findMany({
@@ -29,7 +41,8 @@ export default async function Home() {
                 Copy-ready Cursor commands, shared by the community
               </h2>
               <p className="mx-auto max-w-2xl text-base text-muted-foreground sm:text-lg md:text-xl">
-                Discover proven commands snippets for Cursor's agent—search, preview, and paste in seconds to speed up your next task.
+                Discover proven commands snippets for Cursor's agent—search,
+                preview, and paste in seconds to speed up your next task.
               </p>
               <div className="flex flex-col items-center gap-3 sm:gap-4">
                 <Suspense
@@ -49,31 +62,40 @@ export default async function Home() {
 
         {/* Features Section */}
         <section className="container mx-auto px-4 py-12 sm:py-16">
-          <div className="mx-auto grid max-w-5xl gap-4 sm:gap-6 sm:grid-cols-2 md:grid-cols-3">
+          <div className="mx-auto grid max-w-5xl gap-4 sm:grid-cols-2 sm:gap-6 md:grid-cols-3">
             <Card>
               <CardHeader>
                 <SearchIcon className="mb-2 h-6 w-6 text-primary sm:h-8 sm:w-8" />
-                <CardTitle className="text-lg sm:text-xl">Curated by real Cursor power users</CardTitle>
+                <CardTitle className="text-lg sm:text-xl">
+                  Curated by real Cursor power users
+                </CardTitle>
                 <CardDescription className="text-sm">
-                  Commands are hand-picked and tested by experienced Cursor users who know what works
+                  Commands are hand-picked and tested by experienced Cursor
+                  users who know what works
                 </CardDescription>
               </CardHeader>
             </Card>
             <Card>
               <CardHeader>
                 <BookmarkIcon className="mb-2 h-6 w-6 text-primary sm:h-8 sm:w-8" />
-                <CardTitle className="text-lg sm:text-xl">One-click copy with usage notes & examples</CardTitle>
+                <CardTitle className="text-lg sm:text-xl">
+                  One-click copy with usage notes & examples
+                </CardTitle>
                 <CardDescription className="text-sm">
-                  Copy commands instantly with detailed usage instructions and real-world examples
+                  Copy commands instantly with detailed usage instructions and
+                  real-world examples
                 </CardDescription>
               </CardHeader>
             </Card>
             <Card className="sm:col-span-2 md:col-span-1">
               <CardHeader>
                 <ZapIcon className="mb-2 h-6 w-6 text-primary sm:h-8 sm:w-8" />
-                <CardTitle className="text-lg sm:text-xl">Tags for stack, framework, and goal</CardTitle>
+                <CardTitle className="text-lg sm:text-xl">
+                  Tags for stack, framework, and goal
+                </CardTitle>
                 <CardDescription className="text-sm">
-                  Find exactly what you need with smart tags for your tech stack, framework, and specific goals
+                  Find exactly what you need with smart tags for your tech
+                  stack, framework, and specific goals
                 </CardDescription>
               </CardHeader>
             </Card>

@@ -25,7 +25,9 @@ export function CommandModerationCard({ command }: CommandModerationCardProps) {
       <CardHeader className="p-4 sm:p-6">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex-1">
-            <CardTitle className="text-lg sm:text-xl">{command.title}</CardTitle>
+            <CardTitle className="text-lg sm:text-xl">
+              {command.title}
+            </CardTitle>
             {command.description && (
               <p className="mt-2 text-muted-foreground text-sm">
                 {command.description}
