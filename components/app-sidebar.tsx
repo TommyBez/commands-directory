@@ -2,13 +2,14 @@
 
 import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/nextjs'
 import {
-  CommandIcon,
   HeartIcon,
   HomeIcon,
+  ListIcon,
   PlusCircleIcon,
   SendIcon,
   ShieldIcon,
 } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
@@ -42,7 +43,7 @@ export function AppSidebar({ isAdmin = false }: AppSidebarProps) {
     {
       title: 'Browse Commands',
       url: '/commands',
-      icon: CommandIcon,
+      icon: ListIcon,
     },
   ]
 
@@ -79,7 +80,15 @@ export function AppSidebar({ isAdmin = false }: AppSidebarProps) {
           <SidebarMenuItem>
             <SidebarMenuButton asChild size="lg">
               <Link href="/">
-                <CommandIcon className="h-6 w-6" />
+                <div className="flex aspect-square h-8 w-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                  <Image
+                    alt="Cursor Commands Explorer Logo"
+                    className="h-6 w-6"
+                    height={24}
+                    src="/logo.svg"
+                    width={24}
+                  />
+                </div>
                 <div className="flex flex-col gap-0.5 leading-none">
                   <span className="font-semibold">Commands</span>
                   <span className="text-muted-foreground text-xs">
