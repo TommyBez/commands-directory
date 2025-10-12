@@ -1,5 +1,80 @@
-<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="1024" height="1024" fill="white"/>
-  <path d="M330 647C318.4 647 308 643.4 298.8 636.2C289.6 629 282.4 619.6 277.2 607.9C272 596.2 269.4 583.1 269.4 568.6C269.4 554.1 272 541 277.2 529.3C282.4 517.6 289.6 508.2 298.8 501C308 493.8 318.4 490.2 330 490.2C341.6 490.2 352 493.8 361.2 501C370.4 508.2 377.6 517.6 382.8 529.3C388 541 390.6 554.1 390.6 568.6C390.6 583.1 388 596.2 382.8 607.9C377.6 619.6 370.4 629 361.2 636.2C352 643.4 341.6 647 330 647ZM330 617C339.2 617 346.8 613.1 352.8 605.3C358.8 597.5 361.8 586.4 361.8 571.9C361.8 557.4 358.8 546.3 352.8 538.5C346.8 530.7 339.2 526.8 330 526.8C320.8 526.8 313.2 530.7 307.2 538.5C301.2 546.3 298.2 557.4 298.2 571.9C298.2 586.4 301.2 597.5 307.2 605.3C313.2 613.1 320.8 617 330 617Z" fill="#1E293B"/>
-  <path d="M694 647C682.4 647 672 643.4 662.8 636.2C653.6 629 646.4 619.6 641.2 607.9C636 596.2 633.4 583.1 633.4 568.6C633.4 554.1 636 541 641.2 529.3C646.4 517.6 653.6 508.2 662.8 501C672 493.8 682.4 490.2 694 490.2C705.6 490.2 716 493.8 725.2 501C734.4 508.2 741.6 517.6 746.8 529.3C752 541 754.6 554.1 754.6 568.6C754.6 583.1 752 596.2 746.8 607.9C741.6 619.6 734.4 629 725.2 636.2C716 643.4 705.6 647 694 647ZM694 617C703.2 617 710.8 613.1 716.8 605.3C722.8 597.5 725.8 586.4 725.8 571.9C725.8 557.4 722.8 546.3 716.8 538.5C710.8 530.7 703.2 526.8 694 526.8C684.8 526.8 677.2 530.7 671.2 538.5C665.2 546.3 662.2 557.4 662.2 571.9C662.2 586.4 665.2 597.5 671.2 605.3C677.2 613.1 684.8 617 694 617Z" fill="#1E293B"/>
+<svg width="800" height="800" viewBox="0 0 800 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="800" height="800" fill="#F8F9FA"/>
+  
+  <!-- Definitions for depth and gradient effects -->
+  <defs>
+    <linearGradient id="slashGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1E293B;stop-opacity:1" />
+      <stop offset="40%" style="stop-color:#0F172A;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#020617;stop-opacity:1" />
+    </linearGradient>
+    <filter id="slashShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
+      <feOffset dx="1" dy="2" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.25"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Left C - opening to the right -->
+  <path d="M 320 400 
+           C 320 325 375 265 445 265
+           C 475 265 503 275 525 292
+           L 490 327
+           C 475 315 458 308 440 308
+           C 400 308 368 340 368 380
+           L 368 420
+           C 368 460 400 492 440 492
+           C 458 492 475 485 490 473
+           L 525 508
+           C 503 525 475 535 445 535
+           C 375 535 320 475 320 400 Z" 
+        fill="#0F172A"/>
+  
+  <!-- Right C - horizontally flipped (opening to the left) -->
+  <path d="M 480 400
+           C 480 475 425 535 355 535
+           C 325 535 297 525 275 508
+           L 310 473
+           C 325 485 342 492 360 492
+           C 400 492 432 460 432 420
+           L 432 380
+           C 432 340 400 308 360 308
+           C 342 308 325 315 310 327
+           L 275 292
+           C 297 275 325 265 355 265
+           C 425 265 480 325 480 400 Z"
+        fill="#0F172A"/>
+  
+  <!-- Forward slash with beveled 3D effect -->
+  <!-- Shadow/depth layer -->
+  <path d="M 409 270 L 419 270 L 391 530 L 381 530 Z" 
+        fill="#64748B" 
+        opacity="0.2"/>
+  
+  <!-- Main slash body -->
+  <path d="M 410 268 L 420 268 L 390 532 L 380 532 Z" 
+        fill="url(#slashGradient)" 
+        filter="url(#slashShadow)"/>
+  
+  <!-- Left facet (darker) -->
+  <path d="M 410 268 L 413 268 L 383 532 L 380 532 Z" 
+        fill="#1E293B" 
+        opacity="0.7"/>
+  
+  <!-- Right facet (lighter highlight) -->
+  <path d="M 417 268 L 420 268 L 390 532 L 387 532 Z" 
+        fill="#475569" 
+        opacity="0.5"/>
+  
+  <!-- Top highlight edge -->
+  <path d="M 412 268 L 418 268 L 418 272 L 412 272 Z" 
+        fill="#64748B" 
+        opacity="0.6"/>
 </svg>
