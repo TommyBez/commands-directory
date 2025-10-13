@@ -24,7 +24,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
-  useSidebar,
 } from '@/components/ui/sidebar'
 
 type AppSidebarProps = {
@@ -33,7 +32,6 @@ type AppSidebarProps = {
 
 export function AppSidebar({ isAdmin = false }: AppSidebarProps) {
   const pathname = usePathname()
-  const { state } = useSidebar()
 
   const mainNavItems = [
     {
