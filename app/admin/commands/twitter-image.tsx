@@ -7,125 +7,123 @@ export const size = {
 }
 export const contentType = 'image/png'
 
-export default async function Image() {
+export default function Image() {
   return new ImageResponse(
-    (
+    <div
+      style={{
+        background: '#0a0a0a',
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '80px',
+      }}
+    >
       <div
         style={{
-          background: '#0a0a0a',
-          width: '100%',
-          height: '100%',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          padding: '80px',
+          textAlign: 'center',
         }}
       >
         <div
           style={{
+            fontSize: 80,
+            fontWeight: 'bold',
+            color: '#ffffff',
+            marginBottom: 32,
+          }}
+        >
+          Command Moderation
+        </div>
+        <div
+          style={{
+            fontSize: 38,
+            color: '#a1a1aa',
+            marginBottom: 60,
+            maxWidth: 900,
+            lineHeight: 1.4,
+          }}
+        >
+          Review and manage submitted commands
+        </div>
+        <div
+          style={{
             display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            textAlign: 'center',
+            gap: 32,
+            fontSize: 28,
+            color: '#71717a',
           }}
         >
           <div
             style={{
-              fontSize: 80,
-              fontWeight: 'bold',
-              color: '#ffffff',
-              marginBottom: 32,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+              background: '#18181b',
+              padding: '16px 28px',
+              borderRadius: 12,
             }}
           >
-            Command Moderation
-          </div>
-          <div
-            style={{
-              fontSize: 38,
-              color: '#a1a1aa',
-              marginBottom: 60,
-              maxWidth: 900,
-              lineHeight: 1.4,
-            }}
-          >
-            Review and manage submitted commands
+            <div
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: '50%',
+                background: '#3b82f6',
+              }}
+            />
+            <div>Review</div>
           </div>
           <div
             style={{
               display: 'flex',
-              gap: 32,
-              fontSize: 28,
-              color: '#71717a',
+              alignItems: 'center',
+              gap: 12,
+              background: '#18181b',
+              padding: '16px 28px',
+              borderRadius: 12,
             }}
           >
             <div
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 12,
-                background: '#18181b',
-                padding: '16px 28px',
-                borderRadius: 12,
+                width: 8,
+                height: 8,
+                borderRadius: '50%',
+                background: '#3b82f6',
               }}
-            >
-              <div
-                style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: '50%',
-                  background: '#3b82f6',
-                }}
-              />
-              <div>Review</div>
-            </div>
+            />
+            <div>Approve</div>
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+              background: '#18181b',
+              padding: '16px 28px',
+              borderRadius: 12,
+            }}
+          >
             <div
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 12,
-                background: '#18181b',
-                padding: '16px 28px',
-                borderRadius: 12,
+                width: 8,
+                height: 8,
+                borderRadius: '50%',
+                background: '#3b82f6',
               }}
-            >
-              <div
-                style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: '50%',
-                  background: '#3b82f6',
-                }}
-              />
-              <div>Approve</div>
-            </div>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 12,
-                background: '#18181b',
-                padding: '16px 28px',
-                borderRadius: 12,
-              }}
-            >
-              <div
-                style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: '50%',
-                  background: '#3b82f6',
-                }}
-              />
-              <div>Reject</div>
-            </div>
+            />
+            <div>Reject</div>
           </div>
         </div>
       </div>
-    ),
+    </div>,
     {
       ...size,
-    }
+    },
   )
 }

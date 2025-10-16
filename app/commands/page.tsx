@@ -11,6 +11,7 @@ import { bookmarks } from '@/db/schema/bookmarks'
 import { categories } from '@/db/schema/categories'
 import { commandTagMap, commandTags } from '@/db/schema/command-tags'
 import { commands } from '@/db/schema/commands'
+import { getUserProfile } from '@/lib/auth'
 
 export const metadata: Metadata = {
   title: 'Browse Commands',
@@ -32,55 +33,42 @@ type PageProps = {
   }>
 }
 
-export default async function CommandsPage({ searchParams }: PageProps) {
-  const params = await searchParams
-  const { userId } = await auth()
+async function buildWhereConditions(params: {
+  q?: string
+  category?: string
+  tag?: string
+}): Promise<SQL<unknown> | undefined> {
+  const conditions: SQL<unknown>[] = [eq(commands.status, 'approved')]
 
-  // Parse query params
-  const q = params.q
-  const category = params.category
-  const tag = params.tag
-  const page = Number.parseInt(params.page || '1', 10)
-  const limit = 20
-  const offset = (page - 1) * limit
-
-  // Build where conditions
-  const conditions: SQL<unknown>[] = []
-  conditions.push(eq(commands.status, 'approved'))
-
-  // Text search
-  if (q) {
+  if (params.q) {
     const searchCondition = or(
-      ilike(commands.title, `%${q}%`),
-      ilike(commands.description, `%${q}%`),
-      ilike(commands.content, `%${q}%`),
+      ilike(commands.title, `%${params.q}%`),
+      ilike(commands.description, `%${params.q}%`),
+      ilike(commands.content, `%${params.q}%`),
     )
     if (searchCondition) {
       conditions.push(searchCondition)
     }
   }
 
-  // Category filter
-  if (category) {
+  if (params.category) {
     const cat = await db.query.categories.findFirst({
-      where: eq(categories.slug, category),
+      where: eq(categories.slug, params.category),
     })
     if (cat) {
       conditions.push(eq(commands.categoryId, cat.id))
     }
   }
 
-  // Tag filter
-  if (tag) {
+  if (params.tag) {
     const tagRecord = await db.query.commandTags.findFirst({
-      where: eq(commandTags.slug, tag),
+      where: eq(commandTags.slug, params.tag),
     })
     if (tagRecord) {
       const commandIds = await db
         .select({ commandId: commandTagMap.commandId })
         .from(commandTagMap)
         .where(eq(commandTagMap.tagId, tagRecord.id))
-
       if (commandIds.length > 0) {
         conditions.push(
           inArray(
@@ -92,10 +80,37 @@ export default async function CommandsPage({ searchParams }: PageProps) {
     }
   }
 
-  const whereClause = conditions.length > 0 ? and(...conditions) : undefined
+  return conditions.length > 0 ? and(...conditions) : undefined
+}
 
-  // Execute queries
-  const [results, totalCount] = await Promise.all([
+async function getBookmarkedCommandIds(
+  profileId: string | null,
+): Promise<string[]> {
+  if (!profileId) {
+    return []
+  }
+  const userBookmarks = await db
+    .select({ commandId: bookmarks.commandId })
+    .from(bookmarks)
+    .where(eq(bookmarks.userId, profileId))
+  return userBookmarks.map((b) => b.commandId)
+}
+
+export default async function CommandsPage({ searchParams }: PageProps) {
+  const params = await searchParams
+  const { userId: clerkId } = await auth()
+  const profile = clerkId ? await getUserProfile(clerkId) : null
+
+  const q = params.q
+  const category = params.category
+  const tag = params.tag
+  const page = Number.parseInt(params.page || '1', 10)
+  const limit = 20
+  const offset = (page - 1) * limit
+
+  const whereClause = await buildWhereConditions({ q, category, tag })
+
+  const [results, totalCount, bookmarkedCommandIds] = await Promise.all([
     db.query.commands.findMany({
       where: whereClause,
       limit,
@@ -115,25 +130,14 @@ export default async function CommandsPage({ searchParams }: PageProps) {
       .from(commands)
       .where(whereClause)
       .then((res) => Number(res[0]?.count || 0)),
+    getBookmarkedCommandIds(profile?.id ?? null),
   ])
 
-  // Get bookmarks
-  let bookmarkedCommandIds: string[] = []
-  if (userId) {
-    const userBookmarks = await db
-      .select({ commandId: bookmarks.commandId })
-      .from(bookmarks)
-      .where(eq(bookmarks.userId, userId))
-    bookmarkedCommandIds = userBookmarks.map((b) => b.commandId)
-  }
-
-  // Add isBookmarked flag
   const commandsWithBookmarks = results.map((command) => ({
     ...command,
     isBookmarked: bookmarkedCommandIds.includes(command.id),
   }))
 
-  // Build pagination
   const pagination = {
     page,
     total: totalCount,

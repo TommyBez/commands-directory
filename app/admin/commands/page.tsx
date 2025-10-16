@@ -7,7 +7,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { db } from '@/db'
 import { commands } from '@/db/schema/commands'
-import { userProfiles } from '@/db/schema/user-profiles'
+import { getUserProfile } from '@/lib/auth'
 
 export const metadata: Metadata = {
   title: 'Command Moderation',
@@ -23,16 +23,14 @@ export const metadata: Metadata = {
 }
 
 export default async function AdminCommandsPage() {
-  const { userId } = await auth()
+  const { userId: clerkId } = await auth()
 
-  if (!userId) {
+  if (!clerkId) {
     redirect('/sign-in')
   }
 
   // Check if user is admin
-  const profile = await db.query.userProfiles.findFirst({
-    where: eq(userProfiles.userId, userId),
-  })
+  const profile = await getUserProfile(clerkId)
 
   if (profile?.role !== 'admin') {
     redirect('/')

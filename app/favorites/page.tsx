@@ -7,6 +7,7 @@ import { CommandCard } from '@/components/command-card'
 import { Button } from '@/components/ui/button'
 import { db } from '@/db'
 import { bookmarks } from '@/db/schema/bookmarks'
+import { getUserProfile } from '@/lib/auth'
 
 export const metadata: Metadata = {
   title: 'My Favorites',
@@ -24,14 +25,19 @@ export const metadata: Metadata = {
 }
 
 export default async function FavoritesPage() {
-  const { userId } = await auth()
+  const { userId: clerkId } = await auth()
 
-  if (!userId) {
+  if (!clerkId) {
+    redirect('/sign-in?redirect_url=/favorites')
+  }
+
+  const profile = await getUserProfile(clerkId)
+  if (!profile) {
     redirect('/sign-in?redirect_url=/favorites')
   }
 
   const userBookmarks = await db.query.bookmarks.findMany({
-    where: eq(bookmarks.userId, userId),
+    where: eq(bookmarks.userId, profile.id),
     with: {
       command: {
         with: {

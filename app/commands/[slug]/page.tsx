@@ -14,7 +14,7 @@ import { Separator } from '@/components/ui/separator'
 import { db } from '@/db'
 import { bookmarks } from '@/db/schema/bookmarks'
 import { commands } from '@/db/schema/commands'
-import { userProfiles } from '@/db/schema/user-profiles'
+import { getUserProfile } from '@/lib/auth'
 
 const MAX_RELATED_COMMANDS = 4
 
@@ -61,7 +61,8 @@ export async function generateMetadata({
 
 export default async function CommandDetailPage({ params }: PageProps) {
   const { slug } = await params
-  const { userId } = await auth()
+  const { userId: clerkId } = await auth()
+  const profile = clerkId ? await getUserProfile(clerkId) : null
 
   // Fetch main command
   const command = await db.query.commands.findFirst({
@@ -84,15 +85,12 @@ export default async function CommandDetailPage({ params }: PageProps) {
   const isApproved = command.status === 'approved'
 
   let canView = isApproved
-  if (!canView && userId) {
-    const isOwner = command.submittedByUserId === userId
+  if (!canView && profile) {
+    const isOwner = command.submittedByUserId === profile.id
     if (isOwner) {
       canView = true
     } else {
-      const profile = await db.query.userProfiles.findFirst({
-        where: eq(userProfiles.userId, userId),
-      })
-      canView = profile?.role === 'admin'
+      canView = profile.role === 'admin'
     }
   }
 
@@ -124,11 +122,11 @@ export default async function CommandDetailPage({ params }: PageProps) {
 
   // Get bookmarked command IDs if user is authenticated
   let bookmarkedCommandIds: string[] = []
-  if (userId) {
+  if (profile) {
     const userBookmarks = await db
       .select({ commandId: bookmarks.commandId })
       .from(bookmarks)
-      .where(eq(bookmarks.userId, userId))
+      .where(eq(bookmarks.userId, profile.id))
     bookmarkedCommandIds = userBookmarks.map((b) => b.commandId)
   }
 

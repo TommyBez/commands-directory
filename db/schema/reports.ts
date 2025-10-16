@@ -1,6 +1,7 @@
 import { relations } from 'drizzle-orm'
 import { pgEnum, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
 import { commands } from './commands'
+import { userProfiles } from './user-profiles'
 
 export const reportKindEnum = pgEnum('report_kind', [
   'incorrect',
@@ -15,7 +16,7 @@ export const reportStatusEnum = pgEnum('report_status', [
 
 export const reports = pgTable('reports', {
   id: uuid('id').defaultRandom().primaryKey(),
-  userId: text('user_id'),
+  userId: uuid('user_id').references(() => userProfiles.id),
   commandId: uuid('command_id')
     .notNull()
     .references(() => commands.id, { onDelete: 'cascade' }),

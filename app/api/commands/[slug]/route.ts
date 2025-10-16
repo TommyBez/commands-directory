@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server'
 import { db } from '@/db'
 import { bookmarks } from '@/db/schema/bookmarks'
 import { commands } from '@/db/schema/commands'
-import { userProfiles } from '@/db/schema/user-profiles'
+import { getUserProfile } from '@/lib/auth'
 import { logger } from '@/lib/logger'
 
 export async function GET(
@@ -13,7 +13,8 @@ export async function GET(
   { params }: RouteContext<'/api/commands/[slug]'>,
 ) {
   try {
-    const { userId } = await auth()
+    const { userId: clerkId } = await auth()
+    const profile = clerkId ? await getUserProfile(clerkId) : null
     const { slug } = await params
 
     const command = await db.query.commands.findFirst({
@@ -36,15 +37,12 @@ export async function GET(
     const isApproved = command.status === 'approved'
 
     let canView = isApproved
-    if (!canView && userId) {
-      const isOwner = command.submittedByUserId === userId
+    if (!canView && profile) {
+      const isOwner = command.submittedByUserId === profile.id
       if (isOwner) {
         canView = true
       } else {
-        const profile = await db.query.userProfiles.findFirst({
-          where: eq(userProfiles.userId, userId),
-        })
-        canView = profile?.role === 'admin'
+        canView = profile.role === 'admin'
       }
     }
 
@@ -76,11 +74,11 @@ export async function GET(
 
     // Get bookmarked command IDs if user is authenticated
     let bookmarkedCommandIds: string[] = []
-    if (userId) {
+    if (profile) {
       const userBookmarks = await db
         .select({ commandId: bookmarks.commandId })
         .from(bookmarks)
-        .where(eq(bookmarks.userId, userId))
+        .where(eq(bookmarks.userId, profile.id))
       bookmarkedCommandIds = userBookmarks.map((b) => b.commandId)
     }
 

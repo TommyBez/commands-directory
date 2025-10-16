@@ -77,7 +77,7 @@ export function AppSidebar({ isAdmin = false }: AppSidebarProps) {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild size="lg">
+            <SidebarMenuButton asChild>
               <Link href="/">
                 <CommandIcon className="h-6 w-6" />
                 <div className="flex flex-col gap-0.5 leading-none">

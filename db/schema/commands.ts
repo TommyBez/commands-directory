@@ -2,6 +2,7 @@ import { relations } from 'drizzle-orm'
 import { pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
 import { categories } from './categories'
 import { commandTagMap } from './command-tags'
+import { userProfiles } from './user-profiles'
 
 export const commands = pgTable('commands', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -11,9 +12,15 @@ export const commands = pgTable('commands', {
   content: text('content').notNull(),
   categoryId: uuid('category_id').references(() => categories.id),
   status: text('status').notNull().default('pending'), // 'pending' | 'approved' | 'rejected'
-  submittedByUserId: text('submitted_by_user_id'),
+  submittedByUserId: uuid('submitted_by_user_id').references(
+    () => userProfiles.id,
+    { onDelete: 'set null' },
+  ),
   reviewedAt: timestamp('reviewed_at'),
-  reviewedByUserId: text('reviewed_by_user_id'),
+  reviewedByUserId: uuid('reviewed_by_user_id').references(
+    () => userProfiles.id,
+    { onDelete: 'set null' },
+  ),
   rejectionReason: text('rejection_reason'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
