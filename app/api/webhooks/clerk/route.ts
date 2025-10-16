@@ -1,57 +1,34 @@
-import type { WebhookEvent } from '@clerk/nextjs/server'
+import { verifyWebhook } from '@clerk/nextjs/webhooks'
 import { eq } from 'drizzle-orm'
-import { headers } from 'next/headers'
-import { Webhook } from 'svix'
+import type { NextRequest } from 'next/server'
 import { db } from '@/db'
 import { userProfiles } from '@/db/schema/user-profiles'
 import { logger } from '@/lib/logger'
 
-export async function POST(req: Request) {
-  const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SIGNING_SECRET
-
-  if (!WEBHOOK_SECRET) {
-    logger.error('Missing CLERK_WEBHOOK_SIGNING_SECRET')
-    return new Response('Server configuration error', { status: 500 })
-  }
-
-  const headerPayload = await headers()
-  const svixId = headerPayload.get('svix-id')
-  const svixTimestamp = headerPayload.get('svix-timestamp')
-  const svixSignature = headerPayload.get('svix-signature')
-
-  if (!(svixId && svixTimestamp && svixSignature)) {
-    return new Response('Missing svix headers', { status: 400 })
-  }
-
-  const payload = await req.text()
-
-  const wh = new Webhook(WEBHOOK_SECRET)
-
-  let evt: WebhookEvent
-
+/**
+ * Clerk Webhook Handler
+ *
+ * Handles user.created and user.updated events from Clerk to sync user profiles.
+ *
+ * Configuration:
+ * 1. Set CLERK_WEBHOOK_SIGNING_SECRET in your environment variables
+ * 2. Configure webhook endpoint in Clerk Dashboard: /api/webhooks/clerk
+ * 3. Subscribe to: user.created, user.updated events
+ */
+export async function POST(request: NextRequest) {
   try {
-    evt = wh.verify(payload, {
-      'svix-id': svixId,
-      'svix-timestamp': svixTimestamp,
-      'svix-signature': svixSignature,
-    }) as WebhookEvent
-  } catch (err) {
-    logger.error('Webhook verification failed:', err)
-    return new Response('Invalid signature', { status: 400 })
-  }
+    const event = await verifyWebhook(request)
 
-  const { type, data } = evt
+    const { type, data } = event
+    if (type === 'user.created' || type === 'user.updated') {
+      const clerkId: string = data.id
+      const username: string | null = data.username ?? null
+      const primaryEmailId = data.primary_email_address_id
+      const email: string | null =
+        (data.email_addresses || []).find(
+          (e: { id: string; email_address: string }) => e.id === primaryEmailId,
+        )?.email_address ?? null
 
-  if (type === 'user.created' || type === 'user.updated') {
-    const clerkId: string = data.id
-    const username: string | null = data.username ?? null
-
-    const primaryEmailId: string | undefined = data.primary_email_address_id
-    const email: string | null =
-      (data.email_addresses || []).find((e) => e.id === primaryEmailId)
-        ?.email_address ?? null
-
-    try {
       const existing = await db.query.userProfiles.findFirst({
         where: eq(userProfiles.clerkId, clerkId),
       })
@@ -66,14 +43,13 @@ export async function POST(req: Request) {
         await db.insert(userProfiles).values({ clerkId, email, username })
         logger.info(`Created user profile for clerkId: ${clerkId}`)
       }
-    } catch (error) {
-      logger.error('Error upserting user profile:', error)
-      return new Response('Database error', { status: 500 })
     }
-  }
 
-  return new Response(JSON.stringify({ ok: true }), {
-    status: 200,
-    headers: { 'Content-Type': 'application/json' },
-  })
+    return new Response(JSON.stringify({ success: true }), { status: 200 })
+  } catch (error) {
+    logger.error('Webhook verification or processing failed:', error)
+    return new Response(JSON.stringify({ error: 'Invalid webhook' }), {
+      status: 400,
+    })
+  }
 }
