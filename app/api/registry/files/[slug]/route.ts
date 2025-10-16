@@ -24,10 +24,7 @@ export async function GET(_request: NextRequest, context: RouteContext) {
 
     // Only return approved commands in the registry
     if (!command || command.status !== 'approved') {
-      return NextResponse.json(
-        { error: 'File not found' },
-        { status: 404 },
-      )
+      return NextResponse.json({ error: 'File not found' }, { status: 404 })
     }
 
     // Return the command content as markdown
@@ -40,9 +37,6 @@ export async function GET(_request: NextRequest, context: RouteContext) {
     })
   } catch (error) {
     logger.error('Error fetching registry file:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch file' },
-      { status: 500 },
-    )
+    return NextResponse.json({ error: 'Failed to fetch file' }, { status: 500 })
   }
 }

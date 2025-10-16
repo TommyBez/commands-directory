@@ -44,6 +44,11 @@ export async function GET(_request: NextRequest, context: RouteContext) {
       (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
       'http://localhost:3000'
 
+    // Determine categories
+    const categories = command.category
+      ? [command.category.slug]
+      : command.tags.length > 0 && command.tags.map((t) => t.tag.slug)
+
     // Build the registry item according to shadcn schema
     const registryItem = {
       $schema: 'https://ui.shadcn.com/schema/registry-item.json',
@@ -59,11 +64,7 @@ export async function GET(_request: NextRequest, context: RouteContext) {
         },
       ],
       // Add categories as metadata
-      categories: command.category
-        ? [command.category.slug]
-        : command.tags.length > 0
-          ? command.tags.map((t) => t.tag.slug)
-          : undefined,
+      categories,
       // Add metadata
       meta: {
         commandId: command.id,

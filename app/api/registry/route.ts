@@ -32,37 +32,40 @@ export async function GET(_request: NextRequest) {
     })
 
     // Transform commands into full registry items following registry-item.json schema
-    const registryItems = approvedCommands.map((command) => ({
-      name: command.slug,
-      type: 'registry:file' as const,
-      title: command.title,
-      description: command.description || undefined,
-      files: [
-        {
-          path: `${baseUrl}/api/registry/files/${command.slug}`,
-          type: 'registry:file' as const,
-          target: `.cursor/commands/${command.slug}.md`,
-        },
-      ],
-      categories: command.category
+    const registryItems = approvedCommands.map((command) => {
+      // Determine categories
+      const categories = command.category
         ? [command.category.slug]
-        : command.tags.length > 0
-          ? command.tags.map((t) => t.tag.slug)
+        : command.tags.length > 0 && command.tags.map((t) => t.tag.slug)
+
+      return {
+        name: command.slug,
+        type: 'registry:file' as const,
+        title: command.title,
+        description: command.description || undefined,
+        files: [
+          {
+            path: `${baseUrl}/api/registry/files/${command.slug}`,
+            type: 'registry:file' as const,
+            target: `.cursor/commands/${command.slug}.md`,
+          },
+        ],
+        categories,
+        meta: {
+          commandId: command.id,
+          categoryName: command.category?.name,
+          tags: command.tags.map((t) => ({
+            name: t.tag.name,
+            slug: t.tag.slug,
+          })),
+          createdAt: command.createdAt.toISOString(),
+          updatedAt: command.updatedAt.toISOString(),
+        },
+        docs: command.description
+          ? `# ${command.title}\n\n${command.description}\n\n## Installation\n\nThis command will be installed to \`.cursor/commands/${command.slug}.md\``
           : undefined,
-      meta: {
-        commandId: command.id,
-        categoryName: command.category?.name,
-        tags: command.tags.map((t) => ({
-          name: t.tag.name,
-          slug: t.tag.slug,
-        })),
-        createdAt: command.createdAt.toISOString(),
-        updatedAt: command.updatedAt.toISOString(),
-      },
-      docs: command.description
-        ? `# ${command.title}\n\n${command.description}\n\n## Installation\n\nThis command will be installed to \`.cursor/commands/${command.slug}.md\``
-        : undefined,
-    }))
+      }
+    })
 
     // Build the complete registry following registry.json schema
     const registry = {
