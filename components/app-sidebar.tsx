@@ -83,9 +83,9 @@ export function AppSidebar({ isAdmin = false }: AppSidebarProps) {
                 <div className="flex flex-col gap-0.5 leading-none">
                   <span className="font-semibold">Commands</span>
                   <span className="text-muted-foreground text-xs">
-                      Explorer
-                    </span>
-                  </div>
+                    Explorer
+                  </span>
+                </div>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
