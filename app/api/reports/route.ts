@@ -2,11 +2,13 @@ import { auth } from '@clerk/nextjs/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { db } from '@/db'
 import { reports } from '@/db/schema/reports'
+import { getUserProfile } from '@/lib/auth'
 import { logger } from '@/lib/logger'
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId } = await auth()
+    const { userId: clerkId } = await auth()
+    const profile = clerkId ? await getUserProfile(clerkId) : null
 
     const { commandId, kind, message } = await request.json()
 
@@ -19,7 +21,7 @@ export async function POST(request: NextRequest) {
 
     const report = await db
       .insert(reports)
-      .values({ userId: userId || null, commandId, kind, message })
+      .values({ userId: profile?.id || null, commandId, kind, message })
       .returning()
 
     return NextResponse.json({ data: report[0] }, { status: 201 })
@@ -34,10 +36,10 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   try {
-    const { userId } = await auth()
+    const { userId: clerkId } = await auth()
 
     // Only allow authenticated users to view reports (for moderation)
-    if (!userId) {
+    if (!clerkId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 

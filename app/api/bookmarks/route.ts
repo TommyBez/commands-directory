@@ -3,18 +3,24 @@ import { and, eq } from 'drizzle-orm'
 import { type NextRequest, NextResponse } from 'next/server'
 import { db } from '@/db'
 import { bookmarks } from '@/db/schema/bookmarks'
+import { getUserProfile } from '@/lib/auth'
 import { logger } from '@/lib/logger'
 
 export async function GET() {
   try {
-    const { userId } = await auth()
+    const { userId: clerkId } = await auth()
 
-    if (!userId) {
+    if (!clerkId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const profile = await getUserProfile(clerkId)
+    if (!profile) {
+      return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
+    }
+
     const userBookmarks = await db.query.bookmarks.findMany({
-      where: eq(bookmarks.userId, userId),
+      where: eq(bookmarks.userId, profile.id),
       with: {
         command: {
           with: {
@@ -42,10 +48,15 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId } = await auth()
+    const { userId: clerkId } = await auth()
 
-    if (!userId) {
+    if (!clerkId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const profile = await getUserProfile(clerkId)
+    if (!profile) {
+      return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
     }
 
     const { commandId } = await request.json()
@@ -60,7 +71,7 @@ export async function POST(request: NextRequest) {
     // Check if bookmark already exists
     const existing = await db.query.bookmarks.findFirst({
       where: and(
-        eq(bookmarks.userId, userId),
+        eq(bookmarks.userId, profile.id),
         eq(bookmarks.commandId, commandId),
       ),
     })
@@ -74,7 +85,7 @@ export async function POST(request: NextRequest) {
 
     const bookmark = await db
       .insert(bookmarks)
-      .values({ userId, commandId })
+      .values({ userId: profile.id, commandId })
       .returning()
 
     return NextResponse.json({ data: bookmark[0] }, { status: 201 })
@@ -89,10 +100,15 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const { userId } = await auth()
+    const { userId: clerkId } = await auth()
 
-    if (!userId) {
+    if (!clerkId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const profile = await getUserProfile(clerkId)
+    if (!profile) {
+      return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
     }
 
     const { commandId } = await request.json()
@@ -107,7 +123,10 @@ export async function DELETE(request: NextRequest) {
     await db
       .delete(bookmarks)
       .where(
-        and(eq(bookmarks.userId, userId), eq(bookmarks.commandId, commandId)),
+        and(
+          eq(bookmarks.userId, profile.id),
+          eq(bookmarks.commandId, commandId),
+        ),
       )
 
     return NextResponse.json({ success: true })

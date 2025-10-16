@@ -7,34 +7,30 @@ import { logger } from '@/lib/logger'
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId } = await auth()
+    const { userId: clerkId } = await auth()
 
-    if (!userId) {
+    if (!clerkId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const { onboardingDismissed } = await request.json()
 
-    // Check if profile exists
-    const existing = await db.query.userProfiles.findFirst({
-      where: eq(userProfiles.userId, userId),
+    // Check if profile exists (profile should be created via webhook)
+    const profile = await db.query.userProfiles.findFirst({
+      where: eq(userProfiles.clerkId, clerkId),
     })
 
-    if (existing) {
-      // Update existing profile
-      await db
-        .update(userProfiles)
-        .set({
-          onboardingDismissedAt: onboardingDismissed ? new Date() : null,
-        })
-        .where(eq(userProfiles.userId, userId))
-    } else {
-      // Create new profile
-      await db.insert(userProfiles).values({
-        userId,
+    if (!profile) {
+      return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
+    }
+
+    // Update existing profile
+    await db
+      .update(userProfiles)
+      .set({
         onboardingDismissedAt: onboardingDismissed ? new Date() : null,
       })
-    }
+      .where(eq(userProfiles.id, profile.id))
 
     return NextResponse.json({ success: true })
   } catch (error) {

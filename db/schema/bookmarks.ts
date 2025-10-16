@@ -1,11 +1,14 @@
 import { relations } from 'drizzle-orm'
-import { pgTable, text, timestamp, unique, uuid } from 'drizzle-orm/pg-core'
+import { pgTable, timestamp, unique, uuid } from 'drizzle-orm/pg-core'
 import { commands } from './commands'
+import { userProfiles } from './user-profiles'
 
 export const bookmarks = pgTable(
   'bookmarks',
   {
-    userId: text('user_id').notNull(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => userProfiles.id, { onDelete: 'cascade' }),
     commandId: uuid('command_id')
       .notNull()
       .references(() => commands.id, { onDelete: 'cascade' }),

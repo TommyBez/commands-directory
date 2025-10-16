@@ -11,6 +11,7 @@ import { bookmarks } from '@/db/schema/bookmarks'
 import { categories } from '@/db/schema/categories'
 import { commandTagMap, commandTags } from '@/db/schema/command-tags'
 import { commands } from '@/db/schema/commands'
+import { getUserProfile } from '@/lib/auth'
 
 export const metadata: Metadata = {
   title: 'Browse Commands',
@@ -83,21 +84,22 @@ async function buildWhereConditions(params: {
 }
 
 async function getBookmarkedCommandIds(
-  userId: string | null,
+  profileId: string | null,
 ): Promise<string[]> {
-  if (!userId) {
+  if (!profileId) {
     return []
   }
   const userBookmarks = await db
     .select({ commandId: bookmarks.commandId })
     .from(bookmarks)
-    .where(eq(bookmarks.userId, userId))
+    .where(eq(bookmarks.userId, profileId))
   return userBookmarks.map((b) => b.commandId)
 }
 
 export default async function CommandsPage({ searchParams }: PageProps) {
   const params = await searchParams
-  const { userId } = await auth()
+  const { userId: clerkId } = await auth()
+  const profile = clerkId ? await getUserProfile(clerkId) : null
 
   const q = params.q
   const category = params.category
@@ -128,7 +130,7 @@ export default async function CommandsPage({ searchParams }: PageProps) {
       .from(commands)
       .where(whereClause)
       .then((res) => Number(res[0]?.count || 0)),
-    getBookmarkedCommandIds(userId),
+    getBookmarkedCommandIds(profile?.id ?? null),
   ])
 
   const commandsWithBookmarks = results.map((command) => ({

@@ -8,6 +8,7 @@ import { bookmarks } from '@/db/schema/bookmarks'
 import { categories } from '@/db/schema/categories'
 import { commandTagMap, commandTags } from '@/db/schema/command-tags'
 import { commands } from '@/db/schema/commands'
+import { getUserProfile } from '@/lib/auth'
 import { logger } from '@/lib/logger'
 
 function parseQueryParams(searchParams: URLSearchParams) {
@@ -109,16 +110,16 @@ async function executeCommandsQuery(
 }
 
 async function getBookmarkedCommandIds(
-  userId: string | null,
+  profileId: string | null,
 ): Promise<string[]> {
-  if (!userId) {
+  if (!profileId) {
     return []
   }
 
   const userBookmarks = await db
     .select({ commandId: bookmarks.commandId })
     .from(bookmarks)
-    .where(eq(bookmarks.userId, userId))
+    .where(eq(bookmarks.userId, profileId))
 
   return userBookmarks.map((b) => b.commandId)
 }
@@ -150,7 +151,8 @@ async function generateUniqueSlug(baseTitle: string): Promise<string> {
 
 export async function GET(request: NextRequest) {
   try {
-    const { userId } = await auth()
+    const { userId: clerkId } = await auth()
+    const profile = clerkId ? await getUserProfile(clerkId) : null
     const { q, category, tag, page, limit, offset } = parseQueryParams(
       request.nextUrl.searchParams,
     )
@@ -163,7 +165,9 @@ export async function GET(request: NextRequest) {
       limit,
       offset,
     )
-    const bookmarkedCommandIds = await getBookmarkedCommandIds(userId)
+    const bookmarkedCommandIds = await getBookmarkedCommandIds(
+      profile?.id ?? null,
+    )
 
     // Add isBookmarked flag to each command
     const commandsWithBookmarks = results.map((command) => ({
@@ -235,13 +239,13 @@ function validateCommandInputs(
 }
 
 async function insertCommandWithRetry(params: {
-  userId: string
+  profileId: string
   title: string
   description: string | null
   content: string
   categoryId: string | null
 }) {
-  const { userId, title, description, content, categoryId } = params
+  const { profileId, title, description, content, categoryId } = params
 
   for (let attempt = 1; attempt <= MAX_INSERT_RETRIES; attempt++) {
     try {
@@ -256,7 +260,7 @@ async function insertCommandWithRetry(params: {
           categoryId: categoryId || null,
           slug,
           status: 'pending',
-          submittedByUserId: userId,
+          submittedByUserId: profileId,
         })
         .returning()
 
@@ -283,10 +287,15 @@ async function insertCommandWithRetry(params: {
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId } = await auth()
+    const { userId: clerkId } = await auth()
 
-    if (!userId) {
+    if (!clerkId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const profile = await getUserProfile(clerkId)
+    if (!profile) {
+      return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
     }
 
     const body = await request.json()
@@ -331,7 +340,7 @@ export async function POST(request: NextRequest) {
 
     // Insert command with retry logic
     const newCommand = await insertCommandWithRetry({
-      userId,
+      profileId: profile.id,
       title: tTitle,
       description: tDescription,
       content: tContent,

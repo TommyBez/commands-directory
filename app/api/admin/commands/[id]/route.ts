@@ -12,13 +12,13 @@ export async function DELETE(
   { params }: RouteContext<'/api/admin/commands/[id]'>,
 ) {
   try {
-    const { userId } = await auth()
+    const { userId: clerkId } = await auth()
 
-    if (!userId) {
+    if (!clerkId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const isAdmin = await checkAdminAccess(userId)
+    const isAdmin = await checkAdminAccess(clerkId)
     if (!isAdmin) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }

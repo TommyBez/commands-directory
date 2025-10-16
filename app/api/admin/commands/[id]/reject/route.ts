@@ -4,7 +4,7 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { db } from '@/db'
 import { commands } from '@/db/schema/commands'
-import { checkAdminAccess } from '@/lib/auth'
+import { checkAdminAccess, getUserProfile } from '@/lib/auth'
 import { logger } from '@/lib/logger'
 
 export async function PATCH(
@@ -12,15 +12,20 @@ export async function PATCH(
   { params }: RouteContext<'/api/admin/commands/[id]/reject'>,
 ) {
   try {
-    const { userId } = await auth()
+    const { userId: clerkId } = await auth()
 
-    if (!userId) {
+    if (!clerkId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const isAdmin = await checkAdminAccess(userId)
+    const isAdmin = await checkAdminAccess(clerkId)
     if (!isAdmin) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
+    const profile = await getUserProfile(clerkId)
+    if (!profile) {
+      return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
     }
 
     const { id } = await params
@@ -42,7 +47,7 @@ export async function PATCH(
       .set({
         status: 'rejected',
         reviewedAt: new Date(),
-        reviewedByUserId: userId,
+        reviewedByUserId: profile.id,
         rejectionReason: reason || null,
       })
       .where(eq(commands.id, id))

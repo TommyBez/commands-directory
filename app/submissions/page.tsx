@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { db } from '@/db'
 import { commands } from '@/db/schema/commands'
+import { getUserProfile } from '@/lib/auth'
 
 export const metadata: Metadata = {
   title: 'My Submissions',
@@ -25,14 +26,19 @@ export const metadata: Metadata = {
 }
 
 export default async function SubmissionsPage() {
-  const { userId } = await auth()
+  const { userId: clerkId } = await auth()
 
-  if (!userId) {
+  if (!clerkId) {
+    redirect('/sign-in')
+  }
+
+  const profile = await getUserProfile(clerkId)
+  if (!profile) {
     redirect('/sign-in')
   }
 
   const userCommands = await db.query.commands.findMany({
-    where: eq(commands.submittedByUserId, userId),
+    where: eq(commands.submittedByUserId, profile.id),
     with: {
       category: true,
       tags: {
