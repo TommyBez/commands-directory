@@ -110,6 +110,7 @@ export default async function CommandsPage({ searchParams }: PageProps) {
 
   const whereClause = await buildWhereConditions({ q, category, tag })
 
+
   const [results, totalCount, bookmarkedCommandIds] = await Promise.all([
     db.query.commands.findMany({
       where: whereClause,

@@ -106,8 +106,7 @@ Visit [http://localhost:3000](http://localhost:3000) to see the application.
 │   ├── ui/               # UI components (Radix)
 │   ├── command-card.tsx  # Command card component
 │   ├── command-filters.tsx
-│   ├── search-bar.tsx
-│   └── onboarding-modal.tsx
+│   └── search-bar.tsx
 ├── db/                    # Database
 │   ├── schema/           # Drizzle schemas
 │   └── index.ts          # Database connection
@@ -129,7 +128,7 @@ Visit [http://localhost:3000](http://localhost:3000) to see the application.
 - **bookmarks**: User-saved favorite commands
 - **notes**: User notes attached to commands
 - **reports**: User-submitted issue reports
-- **user_profiles**: User preferences and onboarding state
+- **user_profiles**: User profile data
 
 ## API Endpoints
 
