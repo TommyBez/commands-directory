@@ -17,7 +17,12 @@ export const config = {
   matcher: [
     // Skip Next.js internals, static files, and OG/Twitter images
     '/((?!_next|opengraph-image|twitter-image|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-    // Always run for API routes, but exclude public API routes
-    '/(api|trpc)(?!/(commands|export|webhooks/clerk))(.*)',
+    // Run for protected API routes only
+    '/api/admin(.*)',
+    '/api/bookmarks(.*)',
+    '/api/notes(.*)',
+    '/api/reports(.*)',
+    '/api/user(.*)',
+    '/(trpc)(.*)',
   ],
 }
