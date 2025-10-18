@@ -2,7 +2,6 @@
 
 import { XIcon } from 'lucide-react'
 import { useQueryStates } from 'nuqs'
-import { parseAsString } from 'nuqs/server'
 import { useTransition } from 'react'
 import { Button } from '@/components/ui/button'
 import {
@@ -12,19 +11,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { commandsSearchParams } from '@/lib/search-params'
 
 export function CommandFilters() {
   const [isPending, startTransition] = useTransition()
-  const [filters, setFilters] = useQueryStates(
-    {
-      category: parseAsString.withDefault(''),
-      tag: parseAsString.withDefault(''),
-      page: parseAsString,
-    },
-    {
-      shallow: false,
-    },
-  )
+  const [filters, setFilters] = useQueryStates(commandsSearchParams, {
+    shallow: false,
+  })
 
   const handleFilterChange = (key: 'category' | 'tag', value: string) => {
     startTransition(() => {

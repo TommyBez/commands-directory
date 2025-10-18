@@ -12,7 +12,7 @@ import { categories } from '@/db/schema/categories'
 import { commandTagMap, commandTags } from '@/db/schema/command-tags'
 import { commands } from '@/db/schema/commands'
 import { getUserProfile } from '@/lib/auth'
-import { searchParamsCache } from '@/lib/search-params'
+import { loadCommandsSearchParams } from '@/lib/search-params'
 
 export const metadata: Metadata = {
   title: 'Browse Commands',
@@ -96,8 +96,9 @@ export default async function CommandsPage({ searchParams }: PageProps) {
   const { userId: clerkId } = await auth()
   const profile = clerkId ? await getUserProfile(clerkId) : null
 
-  // Parse and validate search params using nuqs
-  const { q, category, tag, page } = await searchParamsCache.parse(searchParams)
+  // Load and parse search params using nuqs loader
+  const { q, category, tag, page } =
+    await loadCommandsSearchParams(searchParams)
   const limit = 20
   const offset = (page - 1) * limit
 
