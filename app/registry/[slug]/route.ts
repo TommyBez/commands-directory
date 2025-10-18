@@ -7,13 +7,15 @@ import { logger } from '@/lib/logger'
 
 const JSON_POSTFIX_REGEX = /\.json$/
 
-
 /**
  * GET /api/registry/[slug]
  * Returns a shadcn registry item JSON for a specific command
  * Following the registry spec from https://ui.shadcn.com/schema/registry-item.json
  */
-export async function GET(_request: NextRequest, context: RouteContext<'/registry/[slug]'>) {
+export async function GET(
+  _request: NextRequest,
+  context: RouteContext<'/registry/[slug]'>,
+) {
   try {
     const { slug } = await context.params
 

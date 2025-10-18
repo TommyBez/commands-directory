@@ -1,14 +1,13 @@
 import { auth } from '@clerk/nextjs/server'
 import { and, eq } from 'drizzle-orm'
-import { FlagIcon } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { BookmarkButton } from '@/components/bookmark-button'
 import { CommandCard } from '@/components/command-card'
 import { CopyCommandButton } from '@/components/copy-command-button'
+import { InstallWithShadcnButton } from '@/components/install-with-shadcn-button'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { db } from '@/db'
@@ -173,8 +172,12 @@ export default async function CommandDetailPage({ params }: PageProps) {
                 commandId={commandWithBookmark.id}
                 initialBookmarked={commandWithBookmark.isBookmarked}
                 showText={true}
-                size="default"
+                size="lg"
                 variant="outline"
+              />
+              <InstallWithShadcnButton
+                size="lg"
+                slug={commandWithBookmark.slug}
               />
               <CopyCommandButton content={commandWithBookmark.content} />
             </div>
@@ -219,15 +222,6 @@ export default async function CommandDetailPage({ params }: PageProps) {
                   )}
                 </div>
               )}
-          </div>
-
-          {/* Actions */}
-          <div className="flex gap-2">
-            <Button className="flex-1" size="sm" variant="outline">
-              <FlagIcon className="mr-2 h-4 w-4" />
-              <span className="hidden sm:inline">Report Issue</span>
-              <span className="sm:hidden">Report</span>
-            </Button>
           </div>
 
           {/* Related Commands */}
