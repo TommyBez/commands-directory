@@ -4,7 +4,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { CommandCard } from '@/components/command-card'
 import { CommandFilters } from '@/components/command-filters'
-import { SearchBar } from '@/components/search-bar'
+import { CommandsSearchInput } from '@/components/commands-search-input'
 import { Button } from '@/components/ui/button'
 import { db } from '@/db'
 import { bookmarks } from '@/db/schema/bookmarks'
@@ -12,6 +12,7 @@ import { categories } from '@/db/schema/categories'
 import { commandTagMap, commandTags } from '@/db/schema/command-tags'
 import { commands } from '@/db/schema/commands'
 import { getUserProfile } from '@/lib/auth'
+import { searchParamsCache } from '@/lib/search-params'
 
 export const metadata: Metadata = {
   title: 'Browse Commands',
@@ -25,22 +26,17 @@ export const metadata: Metadata = {
 }
 
 type PageProps = {
-  searchParams: Promise<{
-    q?: string
-    category?: string
-    tag?: string
-    page?: string
-  }>
+  searchParams: Promise<Record<string, string | string[] | undefined>>
 }
 
 async function buildWhereConditions(params: {
-  q?: string
-  category?: string
-  tag?: string
+  q: string
+  category: string
+  tag: string
 }): Promise<SQL<unknown> | undefined> {
   const conditions: SQL<unknown>[] = [eq(commands.status, 'approved')]
 
-  if (params.q) {
+  if (params.q.trim()) {
     const searchCondition = or(
       ilike(commands.title, `%${params.q}%`),
       ilike(commands.description, `%${params.q}%`),
@@ -51,7 +47,7 @@ async function buildWhereConditions(params: {
     }
   }
 
-  if (params.category) {
+  if (params.category.trim()) {
     const cat = await db.query.categories.findFirst({
       where: eq(categories.slug, params.category),
     })
@@ -60,7 +56,7 @@ async function buildWhereConditions(params: {
     }
   }
 
-  if (params.tag) {
+  if (params.tag.trim()) {
     const tagRecord = await db.query.commandTags.findFirst({
       where: eq(commandTags.slug, params.tag),
     })
@@ -97,14 +93,11 @@ async function getBookmarkedCommandIds(
 }
 
 export default async function CommandsPage({ searchParams }: PageProps) {
-  const params = await searchParams
   const { userId: clerkId } = await auth()
   const profile = clerkId ? await getUserProfile(clerkId) : null
 
-  const q = params.q
-  const category = params.category
-  const tag = params.tag
-  const page = Number.parseInt(params.page || '1', 10)
+  // Parse and validate search params using nuqs
+  const { q, category, tag, page } = await searchParamsCache.parse(searchParams)
   const limit = 20
   const offset = (page - 1) * limit
 
@@ -149,7 +142,7 @@ export default async function CommandsPage({ searchParams }: PageProps) {
       <div className="space-y-6 sm:space-y-8">
         <div className="space-y-3 sm:space-y-4">
           <h2 className="font-bold text-2xl sm:text-3xl">Search Commands</h2>
-          <SearchBar />
+          <CommandsSearchInput />
         </div>
 
         <div className="space-y-3 sm:space-y-4">
@@ -191,7 +184,14 @@ export default async function CommandsPage({ searchParams }: PageProps) {
               {pagination.page > 1 && (
                 <Button asChild className="w-full sm:w-auto" variant="outline">
                   <Link
-                    href={`/commands?${new URLSearchParams({ ...params, page: String(pagination.page - 1) }).toString()}`}
+                    href={`/commands?${new URLSearchParams(
+                      Object.entries({
+                        q,
+                        category,
+                        tag,
+                        page: String(pagination.page - 1),
+                      }).filter(([, value]) => value),
+                    ).toString()}`}
                   >
                     Previous
                   </Link>
@@ -200,7 +200,14 @@ export default async function CommandsPage({ searchParams }: PageProps) {
               {pagination.page < pagination.totalPages && (
                 <Button asChild className="w-full sm:w-auto" variant="outline">
                   <Link
-                    href={`/commands?${new URLSearchParams({ ...params, page: String(pagination.page + 1) }).toString()}`}
+                    href={`/commands?${new URLSearchParams(
+                      Object.entries({
+                        q,
+                        category,
+                        tag,
+                        page: String(pagination.page + 1),
+                      }).filter(([, value]) => value),
+                    ).toString()}`}
                   >
                     Next
                   </Link>
