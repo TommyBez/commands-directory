@@ -1,7 +1,8 @@
 'use client'
 
 import { XIcon } from 'lucide-react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useQueryStates } from 'nuqs'
+import { useTransition } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   Select,
@@ -10,40 +11,43 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { commandsSearchParams } from '@/lib/search-params'
 
 export function CommandFilters() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
+  const [isPending, startTransition] = useTransition()
+  const [filters, setFilters] = useQueryStates(commandsSearchParams, {
+    shallow: false,
+  })
 
-  const handleFilterChange = (key: string, value: string) => {
-    const params = new URLSearchParams(searchParams)
-    if (value && value !== 'all') {
-      params.set(key, value)
-    } else {
-      params.delete(key)
-    }
-    params.delete('page') // Reset to first page
-    router.push(`/commands?${params.toString()}`)
+  const handleFilterChange = (key: 'category' | 'tag', value: string) => {
+    startTransition(() => {
+      setFilters({
+        [key]: value && value !== 'all' ? value : null,
+        page: null, // Reset to first page
+      })
+    })
   }
 
   const clearFilters = () => {
-    const params = new URLSearchParams()
-    const q = searchParams.get('q')
-    if (q) {
-      params.set('q', q)
-    }
-    router.push(`/commands?${params.toString()}`)
+    startTransition(() => {
+      setFilters({
+        category: null,
+        tag: null,
+        page: null,
+      })
+    })
   }
 
-  const hasFilters = searchParams.has('category') || searchParams.has('tag')
+  const hasFilters = filters.category || filters.tag
 
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end sm:gap-4">
       <div className="flex flex-col gap-2">
         <span className="font-medium text-sm">Category</span>
         <Select
+          disabled={isPending}
           onValueChange={(value) => handleFilterChange('category', value)}
-          value={searchParams.get('category') || 'all'}
+          value={filters.category || 'all'}
         >
           <SelectTrigger className="w-full sm:w-[200px]">
             <SelectValue placeholder="All Categories" />
@@ -66,8 +70,9 @@ export function CommandFilters() {
       <div className="flex flex-col gap-2">
         <span className="font-medium text-sm">Tag</span>
         <Select
+          disabled={isPending}
           onValueChange={(value) => handleFilterChange('tag', value)}
-          value={searchParams.get('tag') || 'all'}
+          value={filters.tag || 'all'}
         >
           <SelectTrigger className="w-full sm:w-[200px]">
             <SelectValue placeholder="All Tags" />
@@ -88,6 +93,7 @@ export function CommandFilters() {
       {hasFilters && (
         <Button
           className="w-full sm:w-auto"
+          disabled={isPending}
           onClick={clearFilters}
           size="sm"
           variant="outline"
