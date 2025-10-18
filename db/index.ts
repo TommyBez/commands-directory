@@ -1,5 +1,4 @@
 import { neon } from '@neondatabase/serverless'
-import dotenv from 'dotenv'
 import { drizzle } from 'drizzle-orm/neon-http'
 import { bookmarks, bookmarksRelations } from './schema/bookmarks'
 import { categories, categoriesRelations } from './schema/categories'
@@ -18,11 +17,6 @@ import {
   reportsRelations,
 } from './schema/reports'
 import { userProfiles } from './schema/user-profiles'
-
-// Load environment variables
-if (typeof window === 'undefined') {
-  dotenv.config({ path: '.env.local' })
-}
 
 const databaseUrl = process.env.DATABASE_URL
 if (!databaseUrl) {
