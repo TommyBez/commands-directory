@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { McpModal } from '@/components/mcp-modal'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { SidebarTrigger } from '@/components/ui/sidebar'
 import { UserButtons } from '@/components/user-buttons'
@@ -22,6 +23,7 @@ export function Header() {
           </h1>
         </Link>
         <div className="flex items-center gap-2">
+          <McpModal />
           <UserButtons />
           <ThemeToggle />
         </div>

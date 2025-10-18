@@ -2,6 +2,7 @@ import { BookmarkIcon, SearchIcon, ZapIcon } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Suspense } from 'react'
+import { McpModal } from '@/components/mcp-modal'
 import { SearchBar } from '@/components/search-bar'
 import { Button } from '@/components/ui/button'
 import {
@@ -49,6 +50,12 @@ export default async function Home() {
               >
                 <SearchBar />
               </Suspense>
+              <div className="flex items-center gap-2">
+                <McpModal />
+                <p className="text-muted-foreground text-sm">
+                  Install via MCP to use commands directly in your IDE
+                </p>
+              </div>
             </div>
           </div>
         </div>
