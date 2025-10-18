@@ -180,16 +180,12 @@ export function AppSidebar({ isAdmin = false }: AppSidebarProps) {
             <SignedIn>
               <div className="flex items-center gap-2 px-2 py-1.5">
                 <UserButton
-                  afterSignOutUrl="/"
                   appearance={{
                     elements: {
                       avatarBox: 'h-8 w-8',
                     },
                   }}
                 />
-                <span className="flex-1 truncate font-medium text-sm group-data-[collapsible=icon]:hidden">
-                  Account
-                </span>
               </div>
             </SignedIn>
           </SidebarMenuItem>
