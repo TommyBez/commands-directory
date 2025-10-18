@@ -8,10 +8,11 @@ import { logger } from '@/lib/logger'
 /**
  * GET /api/registry
  * Returns the complete registry following the registry.json schema
+ * Following the registry spec from https://ui.shadcn.com/schema/registry.json
  */
 export async function GET(_request: NextRequest) {
   try {
-    // Get the base URL for file references
+    // Get the base URL for homepage
     const baseUrl =
       process.env.NEXT_PUBLIC_APP_URL ||
       (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
@@ -33,26 +34,36 @@ export async function GET(_request: NextRequest) {
 
     // Transform commands into full registry items following registry-item.json schema
     const registryItems = approvedCommands.map((command) => {
-      // Determine categories
-      const categories = command.category
-        ? [command.category.slug]
-        : command.tags.length > 0 && command.tags.map((t) => t.tag.slug)
+      // Determine categories (tags as categories for filtering)
+      let categories: string[] = []
+      if (command.tags.length > 0) {
+        categories = command.tags.map((t) => t.tag.slug)
+      } else if (command.category) {
+        categories = [command.category.slug]
+      }
+
+      // Build dependencies array if available
+      const dependencies: string[] = []
+      const registryDependencies: string[] = []
 
       return {
         name: command.slug,
         type: 'registry:file' as const,
         title: command.title,
         description: command.description || undefined,
+        dependencies,
+        registryDependencies,
         files: [
           {
-            path: `${baseUrl}/api/registry/files/${command.slug}`,
+            path: `registry/default/${command.category?.slug || 'commands'}/${command.slug}.md`,
             type: 'registry:file' as const,
-            target: `.cursor/commands/${command.slug}.md`,
+            target: `~/.cursor/commands/${command.slug}.md`,
           },
         ],
-        categories,
+        // Add categories for filtering
+        ...(categories.length > 0 && { categories }),
+        // Add metadata
         meta: {
-          commandId: command.id,
           categoryName: command.category?.name,
           tags: command.tags.map((t) => ({
             name: t.tag.name,

@@ -12,6 +12,7 @@ type RouteContext = {
 /**
  * GET /api/registry/[slug]
  * Returns a shadcn registry item JSON for a specific command
+ * Following the registry spec from https://ui.shadcn.com/schema/registry-item.json
  */
 export async function GET(_request: NextRequest, context: RouteContext) {
   try {
@@ -38,16 +39,17 @@ export async function GET(_request: NextRequest, context: RouteContext) {
       )
     }
 
-    // Get the base URL for file references
-    const baseUrl =
-      process.env.NEXT_PUBLIC_APP_URL ||
-      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
-      'http://localhost:3000'
+    // Determine categories (tags as categories for filtering)
+    let categories: string[] = []
+    if (command.tags.length > 0) {
+      categories = command.tags.map((t) => t.tag.slug)
+    } else if (command.category) {
+      categories = [command.category.slug]
+    }
 
-    // Determine categories
-    const categories = command.category
-      ? [command.category.slug]
-      : command.tags.length > 0 && command.tags.map((t) => t.tag.slug)
+    // Build dependencies array if available
+    const dependencies: string[] = []
+    const registryDependencies: string[] = []
 
     // Build the registry item according to shadcn schema
     const registryItem = {
@@ -56,18 +58,20 @@ export async function GET(_request: NextRequest, context: RouteContext) {
       type: 'registry:file' as const,
       title: command.title,
       description: command.description || undefined,
+      dependencies,
+      registryDependencies,
       files: [
         {
-          path: `${baseUrl}/api/registry/files/${command.slug}`,
+          path: `registry/default/${command.category?.slug || 'commands'}/${command.slug}.md`,
+          content: command.content,
           type: 'registry:file' as const,
-          target: `.cursor/commands/${command.slug}.md`,
+          target: `~/.cursor/commands/${command.slug}.md`,
         },
       ],
-      // Add categories as metadata
-      categories,
+      // Add categories for filtering
+      ...(categories.length > 0 && { categories }),
       // Add metadata
       meta: {
-        commandId: command.id,
         categoryName: command.category?.name,
         tags: command.tags.map((t) => ({
           name: t.tag.name,
