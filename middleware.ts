@@ -5,6 +5,7 @@ const isPublicRoute = createRouteMatcher([
   '/commands(.*)',
   '/sign-in(.*)',
   '/sign-up(.*)',
+  '/api/webhooks(.*)',
 ])
 
 export default clerkMiddleware(async (auth, request) => {
@@ -15,14 +16,9 @@ export default clerkMiddleware(async (auth, request) => {
 
 export const config = {
   matcher: [
-    // Skip Next.js internals, static files, and OG/Twitter images
-    '/((?!_next|opengraph-image|twitter-image|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-    // Run for protected API routes only
-    '/api/admin(.*)',
-    '/api/bookmarks(.*)',
-    '/api/notes(.*)',
-    '/api/reports(.*)',
-    '/api/user(.*)',
-    '/(trpc)(.*)',
+    // Skip Next.js internals and all static files, unless found in search params
+    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
+    // Always run for API routes
+    '/(api|trpc)(.*)',
   ],
-}
+} 
