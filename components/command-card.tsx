@@ -34,8 +34,8 @@ export function CommandCard({
     .slice(0, CONTENT_PREVIEW_LENGTH)
 
   return (
-    <Link href={`/commands/${command.slug}`}>
-      <Card className="group relative cursor-pointer transition-all hover:border-primary/50 hover:shadow-md">
+    <Link className="flex h-full" href={`/commands/${command.slug}`}>
+      <Card className="group relative flex h-full w-full cursor-pointer flex-col transition-all hover:border-primary/50 hover:shadow-md">
         <div className="absolute top-2 right-2 z-10 flex gap-2 opacity-0 transition-opacity group-hover:opacity-100">
           <InstallWithShadcnButton
             showText={false}
@@ -48,7 +48,7 @@ export function CommandCard({
             initialBookmarked={isBookmarked}
           />
         </div>
-        <CardHeader>
+        <CardHeader className="flex-1">
           <CardTitle className="pr-8 text-lg">{command.title}</CardTitle>
           <CardDescription className="line-clamp-2">
             {command.description || contentPreview}
