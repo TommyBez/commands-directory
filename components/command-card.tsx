@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { BookmarkButton } from '@/components/bookmark-button'
+import { InstallWithShadcnButton } from '@/components/install-with-shadcn-button'
 import { Badge } from '@/components/ui/badge'
 import {
   Card,
@@ -35,7 +36,13 @@ export function CommandCard({
   return (
     <Link href={`/commands/${command.slug}`}>
       <Card className="group relative cursor-pointer transition-all hover:border-primary/50 hover:shadow-md">
-        <div className="absolute top-2 right-2 z-10 opacity-0 transition-opacity group-hover:opacity-100">
+        <div className="absolute top-2 right-2 z-10 flex gap-2 opacity-0 transition-opacity group-hover:opacity-100">
+          <InstallWithShadcnButton
+            showText={false}
+            size="icon"
+            slug={command.slug}
+            variant="outline"
+          />
           <BookmarkButton
             commandId={command.id}
             initialBookmarked={isBookmarked}

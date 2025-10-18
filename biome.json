@@ -9,6 +9,11 @@
     }
   },
   "files": {
-    "includes": ["**/*", "!components/ui/*", "!app/globals.css"]
+    "includes": [
+      "**/*",
+      "!components/ui/*",
+      "!components/kibo-ui/*",
+      "!app/globals.css"
+    ]
   }
 }

@@ -70,7 +70,7 @@ export function AppSidebar({ isAdmin = false }: AppSidebarProps) {
   ]
 
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar>
       <SidebarContent>
         {/* Main Navigation */}
         <SidebarGroup>
