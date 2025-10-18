@@ -2,10 +2,10 @@
 
 import { SignedIn } from '@clerk/nextjs'
 import {
-  CommandIcon,
   HeartIcon,
   HomeIcon,
   PlusCircleIcon,
+  SearchIcon,
   SendIcon,
   ShieldIcon,
 } from 'lucide-react'
@@ -17,7 +17,6 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
-  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -40,7 +39,7 @@ export function AppSidebar({ isAdmin = false }: AppSidebarProps) {
     {
       title: 'Browse Commands',
       url: '/commands',
-      icon: CommandIcon,
+      icon: SearchIcon,
     },
   ]
 
@@ -72,28 +71,9 @@ export function AppSidebar({ isAdmin = false }: AppSidebarProps) {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <Link href="/">
-                <CommandIcon className="h-6 w-6" />
-                <div className="flex flex-col gap-0.5 leading-none">
-                  <span className="font-semibold">Commands</span>
-                  <span className="text-muted-foreground text-xs">
-                    Explorer
-                  </span>
-                </div>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarHeader>
-
       <SidebarContent>
         {/* Main Navigation */}
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {mainNavItems.map((item) => (
