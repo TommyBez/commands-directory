@@ -78,7 +78,7 @@ export default function RootLayout({
             disableTransitionOnChange
             enableSystem
           >
-            <SidebarProvider>
+            <SidebarProvider defaultOpen={false}>
               <AppSidebarWrapper />
               <SidebarInset>
                 <Header />
