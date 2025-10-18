@@ -16,12 +16,8 @@ import { logger } from '@/lib/logger'
  * 3. Subscribe to: user.created, user.updated events
  */
 export async function POST(request: NextRequest) {
-  logger.info('Clerk webhook received')
-  logger.dir(request, { depth: null })
   try {
     const event = await verifyWebhook(request)
-    logger.info('Clerk webhook verified')
-    logger.dir(event, { depth: null })
 
     const { type, data } = event
     if (type === 'user.created' || type === 'user.updated') {
