@@ -2,21 +2,12 @@
 
 import { AnimatePresence, motion } from 'motion/react'
 import type { Route } from 'next'
+import dynamic from 'next/dynamic'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import type { BundledLanguage } from '@/components/kibo-ui/code-block'
-import {
-  CodeBlock,
-  CodeBlockBody,
-  CodeBlockContent,
-  CodeBlockCopyButton,
-  CodeBlockFilename,
-  CodeBlockFiles,
-  CodeBlockHeader,
-  CodeBlockItem,
-} from '@/components/kibo-ui/code-block'
 import { McpIcon } from '@/components/mcp-icon'
 import {
   ResponsiveModal,
@@ -27,6 +18,64 @@ import {
 } from '@/components/responsive-modal'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+
+// Lazy load CodeBlock components to reduce initial bundle size
+const CodeBlock = dynamic(
+  () =>
+    import('@/components/kibo-ui/code-block').then((mod) => ({
+      default: mod.CodeBlock,
+    })),
+  { ssr: false },
+)
+const CodeBlockHeader = dynamic(
+  () =>
+    import('@/components/kibo-ui/code-block').then((mod) => ({
+      default: mod.CodeBlockHeader,
+    })),
+  { ssr: false },
+)
+const CodeBlockFiles = dynamic(
+  () =>
+    import('@/components/kibo-ui/code-block').then((mod) => ({
+      default: mod.CodeBlockFiles,
+    })),
+  { ssr: false },
+)
+const CodeBlockFilename = dynamic(
+  () =>
+    import('@/components/kibo-ui/code-block').then((mod) => ({
+      default: mod.CodeBlockFilename,
+    })),
+  { ssr: false },
+)
+const CodeBlockCopyButton = dynamic(
+  () =>
+    import('@/components/kibo-ui/code-block').then((mod) => ({
+      default: mod.CodeBlockCopyButton,
+    })),
+  { ssr: false },
+)
+const CodeBlockBody = dynamic(
+  () =>
+    import('@/components/kibo-ui/code-block').then((mod) => ({
+      default: mod.CodeBlockBody,
+    })),
+  { ssr: false },
+)
+const CodeBlockItem = dynamic(
+  () =>
+    import('@/components/kibo-ui/code-block').then((mod) => ({
+      default: mod.CodeBlockItem,
+    })),
+  { ssr: false },
+)
+const CodeBlockContent = dynamic(
+  () =>
+    import('@/components/kibo-ui/code-block').then((mod) => ({
+      default: mod.CodeBlockContent,
+    })),
+  { ssr: false },
+)
 
 // Generate Cursor deeplink for MCP installation
 const generateCursorDeeplink = (name: string, config: object): string => {
