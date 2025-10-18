@@ -2,6 +2,7 @@
 
 import { SignedIn } from '@clerk/nextjs'
 import {
+  FolderIcon,
   HeartIcon,
   HomeIcon,
   PlusCircleIcon,
@@ -22,12 +23,17 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from '@/components/ui/sidebar'
+import type { Category } from '@/db/schema/categories'
 
 type AppSidebarProps = {
   isAdmin?: boolean
+  categories?: Category[]
 }
 
-export function AppSidebar({ isAdmin = false }: AppSidebarProps) {
+export function AppSidebar({
+  isAdmin = false,
+  categories = [],
+}: AppSidebarProps) {
   const pathname = usePathname()
 
   const mainNavItems = [
@@ -93,6 +99,34 @@ export function AppSidebar({ isAdmin = false }: AppSidebarProps) {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {/* Categories Navigation */}
+        {categories.length > 0 && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Categories</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {categories.map((category) => {
+                  const categoryUrl = `/commands?category=${category.slug}`
+                  return (
+                    <SidebarMenuItem key={category.id}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={pathname === categoryUrl}
+                        tooltip={category.description ?? category.name}
+                      >
+                        <Link href={categoryUrl}>
+                          <FolderIcon />
+                          <span>{category.name}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  )
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
 
         {/* User Navigation - Only show when signed in */}
         <SignedIn>

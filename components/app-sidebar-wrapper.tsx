@@ -1,5 +1,6 @@
 import { auth } from '@clerk/nextjs/server'
 import { AppSidebar } from '@/components/app-sidebar'
+import { db } from '@/db'
 import { getUserProfile } from '@/lib/auth'
 
 export async function AppSidebarWrapper() {
@@ -12,5 +13,10 @@ export async function AppSidebarWrapper() {
     isAdmin = profile?.role === 'admin'
   }
 
-  return <AppSidebar isAdmin={isAdmin} />
+  // Fetch all categories
+  const allCategories = await db.query.categories.findMany({
+    orderBy: (categories, { asc }) => [asc(categories.name)],
+  })
+
+  return <AppSidebar categories={allCategories} isAdmin={isAdmin} />
 }
