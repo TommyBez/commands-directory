@@ -172,7 +172,7 @@ export function AppSidebar({ isAdmin = false }: AppSidebarProps) {
           <SidebarMenuItem>
             <SignedOut>
               <SignInButton mode="modal">
-                <Button className="w-full justify-start" variant="outline">
+                <Button variant="outline">
                   Sign In
                 </Button>
               </SignInButton>
