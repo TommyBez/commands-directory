@@ -3,6 +3,7 @@
 import { ThemeToggle } from '@/components/theme-toggle'
 import { Separator } from '@/components/ui/separator'
 import { SidebarTrigger } from '@/components/ui/sidebar'
+import { UserButtons } from '@/components/user-buttons'
 
 export function Header() {
   return (
@@ -13,7 +14,10 @@ export function Header() {
         <h1 className="font-semibold text-base sm:text-lg">
           Cursor Commands Explorer
         </h1>
-        <ThemeToggle />
+        <div className="flex items-center gap-2">
+          <UserButtons />
+          <ThemeToggle />
+        </div>
       </div>
     </header>
   )
