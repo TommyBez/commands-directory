@@ -4,7 +4,11 @@ import { categories } from './categories'
 import { commandTagMap } from './command-tags'
 import { userProfiles } from './user-profiles'
 
-export const commandStatusEnum = pgEnum('command_status', ['pending', 'approved', 'rejected'] as const)
+export const commandStatusEnum = pgEnum('command_status', [
+  'pending',
+  'approved',
+  'rejected',
+] as const)
 
 export const commands = pgTable('commands', {
   id: uuid('id').defaultRandom().primaryKey(),
