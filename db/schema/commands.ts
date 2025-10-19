@@ -1,8 +1,10 @@
 import { relations } from 'drizzle-orm'
-import { pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
+import { pgEnum, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
 import { categories } from './categories'
 import { commandTagMap } from './command-tags'
 import { userProfiles } from './user-profiles'
+
+export const commandStatusEnum = pgEnum('command_status', ['pending', 'approved', 'rejected'] as const)
 
 export const commands = pgTable('commands', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -11,7 +13,7 @@ export const commands = pgTable('commands', {
   description: text('description'),
   content: text('content').notNull(),
   categoryId: uuid('category_id').references(() => categories.id),
-  status: text('status').notNull().default('pending'), // 'pending' | 'approved' | 'rejected'
+  status: commandStatusEnum('status').notNull().default('pending'),
   submittedByUserId: uuid('submitted_by_user_id').references(
     () => userProfiles.id,
     { onDelete: 'set null' },
@@ -34,6 +36,6 @@ export const commandsRelations = relations(commands, ({ one, many }) => ({
   tags: many(commandTagMap),
 }))
 
-export type CommandStatus = 'pending' | 'approved' | 'rejected'
+export type CommandStatus = (typeof commandStatusEnum.enumValues)[number]
 export type Command = typeof commands.$inferSelect
 export type NewCommand = typeof commands.$inferInsert
