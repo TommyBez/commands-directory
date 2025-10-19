@@ -3,6 +3,7 @@ import { Analytics } from '@vercel/analytics/next'
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { ThemeProvider } from 'next-themes'
+import { NuqsAdapter } from 'nuqs/adapters/next/app'
 import { AppSidebarWrapper } from '@/components/app-sidebar-wrapper'
 import { Footer } from '@/components/footer'
 import { Header } from '@/components/header'
@@ -72,24 +73,26 @@ export default function RootLayout({
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            disableTransitionOnChange
-            enableSystem
-          >
-            <SidebarProvider defaultOpen={false}>
-              <AppSidebarWrapper />
-              <SidebarInset>
-                <Header />
-                <div className="flex min-h-[calc(100vh-4rem)] flex-1 flex-col">
-                  {children}
-                  <Footer />
-                </div>
-                <Toaster />
-              </SidebarInset>
-            </SidebarProvider>
-          </ThemeProvider>
+          <NuqsAdapter>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              disableTransitionOnChange
+              enableSystem
+            >
+              <SidebarProvider defaultOpen={false}>
+                <AppSidebarWrapper />
+                <SidebarInset>
+                  <Header />
+                  <div className="flex min-h-[calc(100vh-4rem)] flex-1 flex-col">
+                    {children}
+                    <Footer />
+                  </div>
+                  <Toaster />
+                </SidebarInset>
+              </SidebarProvider>
+            </ThemeProvider>
+          </NuqsAdapter>
           <Analytics />
         </body>
       </html>
