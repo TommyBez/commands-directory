@@ -14,6 +14,14 @@ import { commands, type NewCommand } from '../db/schema/commands'
 async function seed() {
   console.log('🌱 Seeding database...')
 
+  // Clear existing data (in order to respect foreign key constraints)
+  console.log('Clearing existing data...')
+  await db.delete(commandTagMap)
+  await db.delete(commands)
+  await db.delete(commandTags)
+  await db.delete(categories)
+  console.log('✓ Existing data cleared')
+
   // Seed Categories
   const categoryData: NewCategory[] = [
     {
@@ -69,40 +77,36 @@ async function seed() {
       slug: 'create-pull-request',
       title: 'Create Pull Request',
       description: 'Create a comprehensive pull request with proper context',
-      content: `# Create Pull Request
+      content: `# Create PR
 
 ## Overview
-Create a well-structured pull request with all necessary context and information for reviewers.
+Create a well-structured pull request with proper description, labels, and reviewers.
 
 ## Steps
+1. **Prepare branch**
+   - Ensure all changes are committed
+   - Push branch to remote
+   - Verify branch is up to date with main
 
-1. **Review your changes**
-   - Run \`git diff\` to see all modifications
-   - Ensure all changes are intentional
-   - Check for any debug code or temporary changes
+2. **Write PR description**
+   - Summarize changes clearly
+   - Include context and motivation
+   - List any breaking changes
+   - Add screenshots if UI changes
 
-2. **Write a descriptive title**
-   - Use present tense (e.g., "Add user authentication")
-   - Keep it concise but informative
-   - Reference ticket number if applicable
+3. **Set up PR**
+   - Create PR with descriptive title
+   - Add appropriate labels
+   - Assign reviewers
+   - Link related issues
 
-3. **Provide context**
-   - Explain WHY this change is needed
-   - Describe WHAT was changed
-   - Mention any breaking changes
-
-4. **Add testing notes**
-   - List steps to test the changes
-   - Include edge cases
-   - Mention any setup requirements
-
-## Checklist
-- [ ] All tests pass
-- [ ] Code follows project style guide
-- [ ] Documentation updated if needed
-- [ ] No sensitive data in the code
-- [ ] Branch is up to date with main`,
+## PR Template
+- [ ] Feature A
+- [ ] Bug fix B
+- [ ] Unit tests pass
+- [ ] Manual testing completed`,
       categoryId: insertedCategories[0].id,
+      status: 'approved',
     },
     {
       slug: 'code-review-checklist',
@@ -111,45 +115,30 @@ Create a well-structured pull request with all necessary context and information
       content: `# Code Review Checklist
 
 ## Overview
-Systematic approach to reviewing pull requests and code changes.
+Comprehensive checklist for conducting thorough code reviews to ensure quality, security, and maintainability.
 
-## Code Quality
+## Review Categories
 
-### Readability
-- [ ] Code is easy to understand
-- [ ] Variable names are descriptive
+### Functionality
+- [ ] Code does what it's supposed to do
+- [ ] Edge cases are handled
+- [ ] Error handling is appropriate
+- [ ] No obvious bugs or logic errors
+
+### Code Quality
+- [ ] Code is readable and well-structured
 - [ ] Functions are small and focused
-- [ ] Comments explain WHY, not WHAT
+- [ ] Variable names are descriptive
+- [ ] No code duplication
+- [ ] Follows project conventions
 
-### Architecture
-- [ ] Changes follow existing patterns
-- [ ] No unnecessary complexity
-- [ ] Proper separation of concerns
-- [ ] Dependencies are justified
-
-### Performance
-- [ ] No obvious performance issues
-- [ ] Database queries are optimized
-- [ ] No unnecessary re-renders
-- [ ] Resource cleanup is proper
-
-## Security
-- [ ] No hardcoded secrets or credentials
+### Security
+- [ ] No obvious security vulnerabilities
 - [ ] Input validation is present
-- [ ] No SQL injection vulnerabilities
-- [ ] Authentication/authorization checks
-
-## Testing
-- [ ] Tests cover new functionality
-- [ ] Edge cases are tested
-- [ ] Tests are maintainable
-- [ ] All tests pass
-
-## Documentation
-- [ ] README updated if needed
-- [ ] API documentation current
-- [ ] Complex logic is documented`,
+- [ ] Sensitive data is handled properly
+- [ ] No hardcoded secrets`,
       categoryId: insertedCategories[1].id,
+      status: 'approved',
     },
     {
       slug: 'run-tests-and-fix',
@@ -158,44 +147,25 @@ Systematic approach to reviewing pull requests and code changes.
       content: `# Run All Tests and Fix Failures
 
 ## Overview
-Run the complete test suite and fix any failing tests in a systematic way.
+Execute the full test suite and systematically fix any failures, ensuring code quality and functionality.
 
-## Process
-
-1. **Run the full test suite**
-   \`\`\`bash
-   npm test
-   # or
-   pnpm test
-   \`\`\`
+## Steps
+1. **Run test suite**
+   - Execute all tests in the project
+   - Capture output and identify failures
+   - Check both unit and integration tests
 
 2. **Analyze failures**
-   - Read error messages carefully
-   - Identify patterns in failures
-   - Group related failures
+   - Categorize by type: flaky, broken, new failures
+   - Prioritize fixes based on impact
+   - Check if failures are related to recent changes
 
-3. **Fix one at a time**
-   - Start with the simplest failures
-   - Run tests after each fix
-   - Don't move to the next until current is green
-
-4. **For each failure:**
-   - Understand what the test expects
-   - Check if the test needs updating
-   - Fix the code or update the test
-   - Verify the fix doesn't break other tests
-
-5. **Final verification**
-   - Run full suite again
-   - Check coverage if applicable
-   - Ensure no new failures introduced
-
-## Common Issues
-- Outdated snapshots: Update them carefully
-- Race conditions: Add proper async handling
-- Environment issues: Check test setup
-- Flaky tests: Investigate and fix root cause`,
+3. **Fix issues systematically**
+   - Start with the most critical failures
+   - Fix one issue at a time
+   - Re-run tests after each fix`,
       categoryId: insertedCategories[2].id,
+      status: 'approved',
     },
     {
       slug: 'security-audit',
@@ -204,52 +174,32 @@ Run the complete test suite and fix any failing tests in a systematic way.
       content: `# Security Audit
 
 ## Overview
-Comprehensive security review of the codebase to identify and fix vulnerabilities.
+Comprehensive security review to identify and fix vulnerabilities in the codebase.
 
-## Areas to Check
+## Steps
+1. **Dependency audit**
+   - Check for known vulnerabilities
+   - Update outdated packages
+   - Review third-party dependencies
 
-### 1. Authentication & Authorization
-- [ ] Password storage uses proper hashing
-- [ ] Session management is secure
-- [ ] Token expiration is implemented
-- [ ] Role-based access control works correctly
+2. **Code security review**
+   - Check for common vulnerabilities
+   - Review authentication/authorization
+   - Audit data handling practices
 
-### 2. Input Validation
-- [ ] All user inputs are validated
-- [ ] SQL injection prevention
-- [ ] XSS protection in place
-- [ ] CSRF tokens implemented
+3. **Infrastructure security**
+   - Review environment variables
+   - Check access controls
+   - Audit network security
 
-### 3. Data Protection
-- [ ] Sensitive data is encrypted
-- [ ] No secrets in code or logs
-- [ ] Proper HTTPS configuration
-- [ ] Secure cookie flags set
-
-### 4. Dependencies
-- [ ] Run \`npm audit\` or \`pnpm audit\`
-- [ ] Review all dependency vulnerabilities
-- [ ] Update vulnerable packages
-- [ ] Check for known CVEs
-
-### 5. API Security
-- [ ] Rate limiting implemented
-- [ ] Input sanitization present
-- [ ] Error messages don't leak info
-- [ ] CORS configured properly
-
-### 6. File Operations
-- [ ] File upload validation
-- [ ] Path traversal prevention
-- [ ] File size limits enforced
-- [ ] Proper file permissions
-
-## Tools to Use
-- npm/pnpm audit for dependencies
-- ESLint security plugins
-- OWASP ZAP for web scanning
-- Manual code review`,
+## Security Checklist
+- [ ] Dependencies updated and secure
+- [ ] No hardcoded secrets
+- [ ] Input validation implemented
+- [ ] Authentication secure
+- [ ] Authorization properly configured`,
       categoryId: insertedCategories[1].id,
+      status: 'approved',
     },
     {
       slug: 'setup-new-feature',
@@ -258,60 +208,32 @@ Comprehensive security review of the codebase to identify and fix vulnerabilitie
       content: `# Setup New Feature
 
 ## Overview
-Create a well-structured foundation for a new feature following project conventions.
+Systematically set up a new feature from initial planning through to implementation structure.
 
 ## Steps
+1. **Define requirements**
+   - Clarify feature scope and goals
+   - Identify user stories and acceptance criteria
+   - Plan technical approach
 
-1. **Plan the feature**
-   - Define the scope clearly
-   - List all components needed
-   - Identify dependencies
-   - Create a simple architecture diagram
+2. **Create feature branch**
+   - Branch from main/develop
+   - Set up local development environment
+   - Configure any new dependencies
 
-2. **Create the file structure**
-   \`\`\`
-   features/
-     feature-name/
-       components/
-       hooks/
-       utils/
-       types.ts
-       index.ts
-   \`\`\`
+3. **Plan architecture**
+   - Design data models and APIs
+   - Plan UI components and flow
+   - Consider testing strategy
 
-3. **Set up types and interfaces**
-   - Define TypeScript types first
-   - Create clear interfaces
-   - Document complex types
-
-4. **Create base components**
-   - Start with simple, focused components
-   - Add prop types
-   - Include basic tests
-
-5. **Add routing (if needed)**
-   - Create route definitions
-   - Add navigation links
-   - Set up route guards if needed
-
-6. **Write initial tests**
-   - Unit tests for utilities
-   - Component tests for UI
-   - Integration tests for flows
-
-7. **Document the feature**
-   - Add README in feature folder
-   - Document props and APIs
-   - Include usage examples
-
-## Checklist
-- [ ] File structure created
-- [ ] Types defined
-- [ ] Base components created
-- [ ] Tests added
-- [ ] Documentation written
-- [ ] PR ready for review`,
+## Feature Setup Checklist
+- [ ] Requirements documented
+- [ ] User stories written
+- [ ] Technical approach planned
+- [ ] Feature branch created
+- [ ] Development environment ready`,
       categoryId: insertedCategories[3].id,
+      status: 'approved',
     },
     {
       slug: 'onboard-new-developer',
@@ -323,159 +245,26 @@ Create a well-structured foundation for a new feature following project conventi
 Comprehensive onboarding process to get a new developer up and running quickly.
 
 ## Steps
+1. **Environment setup**
+   - Install required tools
+   - Set up development environment
+   - Configure IDE and extensions
+   - Set up git and SSH keys
 
-### 1. Environment Setup
-- [ ] Install required tools (Node.js, Git, IDE)
-- [ ] Clone the repository
-- [ ] Install dependencies
-- [ ] Set up environment variables
-- [ ] Configure IDE extensions
-
-### 2. Project Familiarization
-- [ ] Review project README
-- [ ] Understand the architecture
-- [ ] Review coding conventions
-- [ ] Explore the folder structure
-
-### 3. Development Environment
-- [ ] Create local database
-- [ ] Run database migrations
-- [ ] Seed test data
-- [ ] Start development server
-- [ ] Verify everything works
-
-### 4. Make First Contribution
-- [ ] Pick a good first issue
-- [ ] Create a feature branch
-- [ ] Make changes following guidelines
-- [ ] Write/update tests
-- [ ] Submit first PR
-
-### 5. Access & Permissions
-- [ ] Add to GitHub organization
-- [ ] Grant necessary repository access
-- [ ] Add to team communication channels
-- [ ] Provide access to deployment tools
-- [ ] Set up monitoring/logging access
-
-### 6. Documentation Review
-- [ ] API documentation
-- [ ] Deployment process
-- [ ] Testing guidelines
-- [ ] Code review process
+2. **Project familiarization**
+   - Review project structure
+   - Understand architecture
+   - Read key documentation
+   - Set up local database
 
 ## Onboarding Checklist
 - [ ] Development environment ready
-- [ ] All tests passing locally
+- [ ] All tests passing
 - [ ] Can run application locally
 - [ ] Database set up and working
-- [ ] Understands git workflow
-- [ ] First PR submitted
-- [ ] Has access to all necessary tools
-
-## Resources
-- Project wiki
-- Team Slack/Discord
-- Meeting schedule
-- Key contacts`,
+- [ ] First PR submitted`,
       categoryId: insertedCategories[4].id,
-    },
-    {
-      slug: 'address-pr-comments',
-      title: 'Address GitHub PR Comments',
-      description:
-        'Systematically address all review comments on a pull request',
-      content: `# Address GitHub PR Comments
-
-## Overview
-Efficiently respond to and resolve all review comments on your pull request.
-
-## Process
-
-1. **Review all comments**
-   - Read through all feedback carefully
-   - Take notes on what needs to be changed
-   - Ask for clarification if needed
-
-2. **Categorize changes**
-   - Quick fixes (typos, formatting)
-   - Code changes (logic, refactoring)
-   - Discussion needed (architectural decisions)
-
-3. **Make the changes**
-   - Start with quick fixes
-   - Group related changes in commits
-   - Test after each significant change
-
-4. **Respond to comments**
-   - Mark resolved items as resolved
-   - Explain your changes if needed
-   - Push back respectfully if you disagree
-   - Thank reviewers for their feedback
-
-5. **Update the PR**
-   - Push your changes
-   - Update the PR description if scope changed
-   - Re-request review when ready
-
-6. **Final check**
-   - Ensure all comments are addressed
-   - Run tests one more time
-   - Verify CI passes
-
-## Tips
-- Don't take feedback personally
-- Ask questions when unsure
-- Batch similar changes together
-- Keep commits atomic and meaningful
-- Be responsive to reviewer feedback`,
-      categoryId: insertedCategories[0].id,
-    },
-    {
-      slug: 'light-code-review',
-      title: 'Light Review of Existing Diffs',
-      description: 'Quick review of existing code changes for obvious issues',
-      content: `# Light Review of Existing Diffs
-
-## Overview
-Quick pass through existing diffs to catch obvious issues before detailed review.
-
-## Quick Checks
-
-### 1. Obvious Issues (2 minutes)
-- [ ] No commented-out code
-- [ ] No console.log or debug statements
-- [ ] No TODO comments without tickets
-- [ ] Proper file formatting
-
-### 2. Code Smell Check (3 minutes)
-- [ ] No extremely long functions
-- [ ] No deeply nested conditions
-- [ ] No obvious code duplication
-- [ ] Reasonable variable names
-
-### 3. Common Mistakes (3 minutes)
-- [ ] No hardcoded values that should be config
-- [ ] Proper error handling present
-- [ ] No unused imports or variables
-- [ ] Type safety maintained
-
-### 4. Documentation (2 minutes)
-- [ ] Complex logic has comments
-- [ ] Public APIs documented
-- [ ] README updated if needed
-
-## Red Flags
-🚩 Large files (>500 lines) - needs splitting
-🚩 Many files changed - might need breaking up
-🚩 Mixed concerns - refactoring and features together
-🚩 No tests - needs test coverage
-
-## Result
-- ✅ Looks good for detailed review
-- ⚠️  Needs minor fixes before review
-- ❌ Needs major rework`,
-      categoryId: insertedCategories[1].id,
+      status: 'approved',
     },
   ]
 
@@ -493,8 +282,6 @@ Quick pass through existing diffs to catch obvious issues before detailed review
     { commandIndex: 3, tagIndex: 3 }, // Security Audit -> Security
     { commandIndex: 4, tagIndex: 4 }, // Setup Feature -> Setup
     { commandIndex: 5, tagIndex: 6 }, // Onboard Developer -> Onboarding
-    { commandIndex: 6, tagIndex: 0 }, // Address PR -> Git
-    { commandIndex: 7, tagIndex: 1 }, // Light Review -> Review
   ]
 
   console.log('Linking commands to tags...')
