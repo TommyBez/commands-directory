@@ -9,7 +9,7 @@ export function CommandsSearchInput() {
     defaultValue: '',
     shallow: false,
   })
-  const [isPending, startTransition] = useTransition()
+  const [, startTransition] = useTransition()
 
   const handleChange = (value: string) => {
     startTransition(() => {
@@ -24,7 +24,6 @@ export function CommandsSearchInput() {
   return (
     <div className="w-full max-w-2xl">
       <Input
-        disabled={isPending}
         onChange={(e) => handleChange(e.target.value)}
         placeholder="Search commands by title, description, or content..."
         type="search"
