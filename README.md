@@ -7,7 +7,6 @@ A community-driven platform for discovering, sharing, and mastering Cursor AI ag
 - 🔍 **Smart Search**: Find Cursor commands by name, description, or content with instant search
 - 📚 **Category Organization**: Browse commands by categories like "Code Review", "Testing", "Documentation"
 - ⭐ **Bookmarks & Favorites**: Save your most-used commands for quick access
-- 📝 **Personal Notes**: Add your own context and usage notes to commands
 - 🏷️ **Tag System**: Find commands by tech stack, framework, and specific goals
 - 🚀 **One-Click Copy**: Copy commands instantly with detailed usage instructions
 - 👥 **Community Driven**: Commands curated and tested by real Cursor power users
@@ -95,7 +94,6 @@ Visit [http://localhost:3000](http://localhost:3000) to see the application.
 │   ├── api/               # API routes
 │   │   ├── commands/      # Commands API
 │   │   ├── bookmarks/     # Bookmarks API
-│   │   ├── notes/         # Notes API
 │   │   ├── reports/       # Reports API
 │   │   └── export/        # Export API
 │   ├── commands/          # Commands pages
@@ -126,7 +124,6 @@ Visit [http://localhost:3000](http://localhost:3000) to see the application.
 - **command_tags**: Tags for organizing commands by tech stack and goals
 - **command_tag_map**: Many-to-many relationship between commands and tags
 - **bookmarks**: User-saved favorite commands
-- **notes**: User notes attached to commands
 - **reports**: User-submitted issue reports
 - **user_profiles**: User profile data
 
@@ -141,12 +138,6 @@ Visit [http://localhost:3000](http://localhost:3000) to see the application.
 - `GET /api/bookmarks` - Get user bookmarks (auth required)
 - `POST /api/bookmarks` - Add bookmark (auth required)
 - `DELETE /api/bookmarks` - Remove bookmark (auth required)
-
-### Notes
-- `GET /api/notes` - Get user notes (auth required)
-- `POST /api/notes` - Create note (auth required)
-- `PUT /api/notes` - Update note (auth required)
-- `DELETE /api/notes` - Delete note (auth required)
 
 ### Reports
 - `GET /api/reports` - List reports (auth required)

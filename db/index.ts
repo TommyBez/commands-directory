@@ -9,7 +9,6 @@ import {
   commandTagsRelations,
 } from './schema/command-tags'
 import { commands, commandsRelations } from './schema/commands'
-import { notes, notesRelations } from './schema/notes'
 import {
   reportKindEnum,
   reportStatusEnum,
@@ -36,8 +35,6 @@ export const db = drizzle(sql, {
     commandTagMapRelations,
     commands,
     commandsRelations,
-    notes,
-    notesRelations,
     reportKindEnum,
     reportStatusEnum,
     reports,

@@ -80,7 +80,7 @@ export default async function Home() {
             <CardHeader>
               <BookmarkIcon className="mb-2 h-6 w-6 text-primary sm:h-8 sm:w-8" />
               <CardTitle className="text-lg sm:text-xl">
-                One-click copy with usage notes & examples
+                One-click copy with usage examples
               </CardTitle>
               <CardDescription className="text-sm">
                 Copy commands instantly with detailed usage instructions and
