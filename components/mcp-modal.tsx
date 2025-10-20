@@ -107,7 +107,7 @@ export const McpModal = () => {
   const namespaceJson = JSON.stringify(
     {
       registries: {
-        '@cursor-commands': 'https://cursor-commands.com/r/{name}.json',
+        '@cursor-commands': 'https://cursor-commands.com/r/{name}',
       },
     },
     null,
