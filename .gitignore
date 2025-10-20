@@ -13,6 +13,9 @@
 #screenshots
 .cursor/screenshots
 
+#local mcp
+.cursor/mcp.json
+
 # testing
 /coverage
 
