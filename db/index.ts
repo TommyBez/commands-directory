@@ -9,12 +9,6 @@ import {
   commandTagsRelations,
 } from './schema/command-tags'
 import { commands, commandsRelations } from './schema/commands'
-import {
-  reportKindEnum,
-  reportStatusEnum,
-  reports,
-  reportsRelations,
-} from './schema/reports'
 import { userProfiles } from './schema/user-profiles'
 
 const databaseUrl = process.env.DATABASE_URL
@@ -35,10 +29,6 @@ export const db = drizzle(sql, {
     commandTagMapRelations,
     commands,
     commandsRelations,
-    reportKindEnum,
-    reportStatusEnum,
-    reports,
-    reportsRelations,
     userProfiles,
   },
 })

@@ -139,10 +139,6 @@ Visit [http://localhost:3000](http://localhost:3000) to see the application.
 - `POST /api/bookmarks` - Add bookmark (auth required)
 - `DELETE /api/bookmarks` - Remove bookmark (auth required)
 
-### Reports
-- `GET /api/reports` - List reports (auth required)
-- `POST /api/reports` - Submit report
-
 ### Export
 - `GET /api/export` - Export commands (JSON/CSV)
 
