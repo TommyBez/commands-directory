@@ -14,7 +14,7 @@ const JSON_POSTFIX_REGEX = /\.json$/
  */
 export async function GET(
   _request: NextRequest,
-  context: RouteContext<'/registry/[slug]'>,
+  context: RouteContext<'/r/[slug]'>,
 ) {
   try {
     const { slug } = await context.params

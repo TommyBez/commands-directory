@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
     }
 
     const commandsList = await db.query.commands.findMany({
-      where: eq(commands.status, status),
+      where: eq(commands.status, status as 'pending' | 'approved' | 'rejected'),
       with: {
         category: true,
         tags: {

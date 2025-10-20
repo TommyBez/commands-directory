@@ -5,15 +5,14 @@ import { db } from '@/db'
 import { commands } from '@/db/schema/commands'
 import { logger } from '@/lib/logger'
 
-type RouteContext = {
-  params: Promise<{ slug: string }>
-}
-
 /**
  * GET /api/registry/files/[slug]
  * Returns the actual file content for a command
  */
-export async function GET(_request: NextRequest, context: RouteContext) {
+export async function GET(
+  _request: NextRequest,
+  context: RouteContext<'/r/files/[slug]'>,
+) {
   try {
     const { slug } = await context.params
 
