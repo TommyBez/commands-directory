@@ -54,7 +54,7 @@ export function CommandModerationCard({ command }: CommandModerationCardProps) {
                 <span>
                   {command.submittedBy.username ||
                     command.submittedBy.email ||
-                    'Unknown'}
+                    'Anonymous'}
                 </span>
               </div>
             )}

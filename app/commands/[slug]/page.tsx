@@ -205,7 +205,7 @@ export default async function CommandDetailPage({ params }: PageProps) {
               <div className="flex items-center gap-2">
                 <span className="font-medium text-xs sm:text-sm">Author:</span>
                 <span className="text-muted-foreground text-xs sm:text-sm">
-                  {commandWithBookmark.submittedBy.username || 'Unknown'}
+                  {commandWithBookmark.submittedBy.username || 'Anonymous'}
                 </span>
               </div>
             )}
