@@ -56,10 +56,7 @@ export function CommandCard({
           </CardDescription>
           {command.submittedBy && (
             <div className="pt-1 text-muted-foreground text-xs">
-              By{' '}
-              {command.submittedBy.username ||
-                command.submittedBy.email ||
-                'Unknown'}
+              By {command.submittedBy.username || 'Unknown'}
             </div>
           )}
         </CardHeader>
