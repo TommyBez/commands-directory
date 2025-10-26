@@ -13,6 +13,7 @@ type CommandWithRelations = Command & {
   tags: Array<{
     tag: { id: string; name: string; slug: string }
   }>
+  submittedBy?: { username: string | null; email: string | null } | null
 }
 
 type CommandModerationCardProps = {
@@ -47,6 +48,16 @@ export function CommandModerationCard({ command }: CommandModerationCardProps) {
           </div>
 
           <div className="flex flex-col gap-2 text-sm sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
+            {command.submittedBy && (
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground">Author:</span>
+                <span>
+                  {command.submittedBy.username ||
+                    command.submittedBy.email ||
+                    'Unknown'}
+                </span>
+              </div>
+            )}
             {command.category && (
               <div className="flex items-center gap-2">
                 <span className="text-muted-foreground">Category:</span>

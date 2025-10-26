@@ -18,6 +18,7 @@ type CommandCardProps = {
   command: Command & {
     category?: { name: string; slug: string } | null
     tags?: Array<{ tag: { name: string; slug: string } }>
+    submittedBy?: { username: string | null; email: string | null } | null
   }
   isBookmarked?: boolean
 }
@@ -53,6 +54,14 @@ export function CommandCard({
           <CardDescription className="line-clamp-2">
             {command.description || contentPreview}
           </CardDescription>
+          {command.submittedBy && (
+            <div className="pt-1 text-muted-foreground text-xs">
+              By{' '}
+              {command.submittedBy.username ||
+                command.submittedBy.email ||
+                'Unknown'}
+            </div>
+          )}
         </CardHeader>
         <CardContent className="space-y-2">
           <div className="flex flex-wrap items-center gap-2">
