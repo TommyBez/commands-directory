@@ -94,8 +94,7 @@ Visit [http://localhost:3000](http://localhost:3000) to see the application.
 │   ├── api/               # API routes
 │   │   ├── commands/      # Commands API
 │   │   ├── bookmarks/     # Bookmarks API
-│   │   ├── reports/       # Reports API
-│   │   └── export/        # Export API
+│   │   └── reports/       # Reports API
 │   ├── commands/          # Commands pages
 │   ├── favorites/         # Favorites page
 │   ├── sign-in/           # Clerk sign-in
@@ -138,9 +137,6 @@ Visit [http://localhost:3000](http://localhost:3000) to see the application.
 - `GET /api/bookmarks` - Get user bookmarks (auth required)
 - `POST /api/bookmarks` - Add bookmark (auth required)
 - `DELETE /api/bookmarks` - Remove bookmark (auth required)
-
-### Export
-- `GET /api/export` - Export commands (JSON/CSV)
 
 ### Admin
 - `GET /api/admin/commands` - Admin command management
