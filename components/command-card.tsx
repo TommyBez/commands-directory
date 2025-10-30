@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { BookmarkButton } from '@/components/bookmark-button'
 import { InstallWithShadcnButton } from '@/components/install-with-shadcn-button'
+import { OpenInCursorButton } from '@/components/open-in-cursor-button'
 import { Badge } from '@/components/ui/badge'
 import {
   Card,
@@ -37,6 +38,13 @@ export function CommandCard({
     <Link className="flex h-full" href={`/commands/${command.slug}`}>
       <Card className="group relative flex h-full w-full cursor-pointer flex-col transition-all hover:border-primary/50 hover:shadow-md">
         <div className="absolute top-2 right-2 z-10 flex gap-2 opacity-0 transition-opacity group-hover:opacity-100">
+          <OpenInCursorButton
+            commandContent={command.content ?? ''}
+            commandName={command.title}
+            showText={false}
+            size="icon"
+            variant="outline"
+          />
           <InstallWithShadcnButton
             showText={false}
             size="icon"
