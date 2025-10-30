@@ -29,7 +29,7 @@ export function OpenInCursorButton({
 
   return (
     <Button
-      aria-label="Open in Cursor"
+      aria-label="Add to Cursor"
       onClick={handleOpenInCursor}
       size={size}
       variant={variant}
@@ -38,7 +38,7 @@ export function OpenInCursorButton({
       <ExternalLink
         className={`h-4 w-4 ${showText ? 'mr-2' : ''}`}
       />
-      {showText && <span>Open in Cursor</span>}
+      {showText && <span>Add to Cursor</span>}
     </Button>
   )
 }
