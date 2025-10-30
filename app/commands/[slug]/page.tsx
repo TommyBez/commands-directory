@@ -7,6 +7,7 @@ import { BookmarkButton } from '@/components/bookmark-button'
 import { CommandCard } from '@/components/command-card'
 import { CopyCommandButton } from '@/components/copy-command-button'
 import { InstallWithShadcnButton } from '@/components/install-with-shadcn-button'
+import { OpenInCursorButton } from '@/components/open-in-cursor-button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
@@ -171,6 +172,13 @@ export default async function CommandDetailPage({ params }: PageProps) {
               <BookmarkButton
                 commandId={commandWithBookmark.id}
                 initialBookmarked={commandWithBookmark.isBookmarked}
+                showText={true}
+                size="lg"
+                variant="outline"
+              />
+              <OpenInCursorButton
+                commandContent={commandWithBookmark.content}
+                commandName={commandWithBookmark.title}
                 showText={true}
                 size="lg"
                 variant="outline"
