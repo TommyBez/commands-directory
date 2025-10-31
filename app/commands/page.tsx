@@ -116,6 +116,7 @@ export default async function CommandsPage({ searchParams }: PageProps) {
             tag: true,
           },
         },
+        submittedBy: true,
       },
       orderBy: (table, { desc }) => [desc(table.createdAt)],
     }),

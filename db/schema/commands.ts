@@ -38,6 +38,10 @@ export const commandsRelations = relations(commands, ({ one, many }) => ({
     references: [categories.id],
   }),
   tags: many(commandTagMap),
+  submittedBy: one(userProfiles, {
+    fields: [commands.submittedByUserId],
+    references: [userProfiles.id],
+  }),
 }))
 
 export type CommandStatus = (typeof commandStatusEnum.enumValues)[number]

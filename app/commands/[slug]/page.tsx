@@ -74,6 +74,7 @@ export default async function CommandDetailPage({ params }: PageProps) {
           tag: true,
         },
       },
+      submittedBy: true,
     },
   })
 
@@ -113,6 +114,7 @@ export default async function CommandDetailPage({ params }: PageProps) {
               tag: true,
             },
           },
+          submittedBy: true,
         },
       })
     : []
@@ -207,6 +209,14 @@ export default async function CommandDetailPage({ params }: PageProps) {
 
           {/* Metadata */}
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
+            {commandWithBookmark.submittedBy && (
+              <div className="flex items-center gap-2">
+                <span className="font-medium text-xs sm:text-sm">Author:</span>
+                <span className="text-muted-foreground text-xs sm:text-sm">
+                  {commandWithBookmark.submittedBy.username || 'Anonymous'}
+                </span>
+              </div>
+            )}
             {commandWithBookmark.category && (
               <div className="flex items-center gap-2">
                 <span className="font-medium text-xs sm:text-sm">
