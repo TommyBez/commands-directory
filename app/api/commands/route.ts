@@ -269,6 +269,7 @@ async function insertCommandWithRetry(params: {
       const error = e as { code?: string; originalError?: { code?: string } }
       const code = error?.code ?? error?.originalError?.code
 
+      // error code 23505 is PostgreSQL unique constraint violation
       if (code === '23505' && attempt < MAX_INSERT_RETRIES) {
         logger.warn(`Slug conflict on attempt ${attempt}, retrying...`, {
           code,
