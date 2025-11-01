@@ -41,7 +41,7 @@ export default function Loading() {
 
               <div className="flex flex-col gap-2 sm:flex-row sm:gap-4">
                 <Skeleton className="h-10 flex-1" />
-                <Skeleton className="h-10 flex-1 sm:flex-initial sm:w-24" />
+                <Skeleton className="h-10 flex-1 sm:w-24 sm:flex-initial" />
               </div>
             </div>
           </CardContent>
