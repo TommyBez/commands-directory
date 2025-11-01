@@ -178,7 +178,7 @@ export default async function CommandDetailPage({ params }: PageProps) {
               />
               <OpenInCursorButton
                 commandContent={commandWithBookmark.content}
-                commandName={commandWithBookmark.title}
+                commandName={commandWithBookmark.slug}
                 showText={true}
                 size="lg"
                 variant="outline"

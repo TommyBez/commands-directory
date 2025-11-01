@@ -40,7 +40,7 @@ export function CommandCard({
         <div className="absolute top-2 right-2 z-10 flex gap-2 opacity-0 transition-opacity group-hover:opacity-100">
           <OpenInCursorButton
             commandContent={command.content ?? ''}
-            commandName={command.title}
+            commandName={command.slug}
             showText={false}
             size="icon"
             variant="outline"
