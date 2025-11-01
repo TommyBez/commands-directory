@@ -1,6 +1,7 @@
 'use server'
 
 import { randomUUID } from 'node:crypto'
+import { revalidateTag } from 'next/cache'
 import { auth } from '@clerk/nextjs/server'
 import { eq } from 'drizzle-orm'
 import { db } from '@/db'
@@ -68,6 +69,20 @@ function validateInput(input: TrimmedInput): SubmitResult | null {
   }
 
   return null
+}
+
+function revalidateCommandCaches(command: CommandRecord) {
+  revalidateTag('commands')
+  revalidateTag('registry')
+
+  if (command.slug) {
+    revalidateTag(`command:${command.slug}`)
+    revalidateTag(`registry:item:${command.slug}`)
+  }
+
+  if (command.categoryId) {
+    revalidateTag(`commands:category:${command.categoryId}`)
+  }
 }
 
 async function validateCategory(categoryId: string): Promise<boolean> {
@@ -229,6 +244,8 @@ export async function approveCommand(commandId: string): Promise<SubmitResult> {
       .where(eq(commands.id, commandId))
       .returning()
 
+    revalidateCommandCaches(updatedCommand)
+
     return { ok: true, data: updatedCommand }
   } catch (error) {
     logger.error('Error approving command:', error)
@@ -278,6 +295,8 @@ export async function rejectCommand(
       .where(eq(commands.id, commandId))
       .returning()
 
+    revalidateCommandCaches(updatedCommand)
+
     return { ok: true, data: updatedCommand }
   } catch (error) {
     logger.error('Error rejecting command:', error)
@@ -311,6 +330,8 @@ export async function deleteCommand(commandId: string): Promise<DeleteResult> {
 
     // Delete the command
     await db.delete(commands).where(eq(commands.id, commandId))
+
+    revalidateCommandCaches(command)
 
     return { ok: true }
   } catch (error) {

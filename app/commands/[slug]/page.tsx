@@ -1,3 +1,4 @@
+import { cacheLife, cacheTag } from 'next/cache'
 import { auth } from '@clerk/nextjs/server'
 import { and, eq } from 'drizzle-orm'
 import type { Metadata } from 'next'
@@ -18,6 +19,60 @@ import { getUserProfile } from '@/lib/auth'
 
 const MAX_RELATED_COMMANDS = 4
 
+async function getCommandBySlug(slug: string) {
+  'use cache'
+  cacheTag(`command:${slug}`)
+  cacheLife('days')
+
+  return await db.query.commands.findFirst({
+    where: eq(commands.slug, slug),
+    with: {
+      category: true,
+      tags: {
+        with: {
+          tag: true,
+        },
+      },
+    },
+  })
+}
+
+async function getRelatedCommands(categoryId: string) {
+  'use cache'
+  cacheTag(`commands:category:${categoryId}`)
+  cacheLife('hours')
+
+  return await db.query.commands.findMany({
+    where: and(eq(commands.categoryId, categoryId), eq(commands.status, 'approved')),
+    limit: 5,
+    with: {
+      category: true,
+      tags: {
+        with: {
+          tag: true,
+        },
+      },
+    },
+  })
+}
+
+async function getBookmarkedCommandIds(profileId: string | null) {
+  'use cache: private'
+  cacheLife('minutes')
+
+  if (!profileId) {
+    return []
+  }
+
+  cacheTag(`bookmarks:user:${profileId}`)
+
+  const userBookmarks = await db
+    .select({ commandId: bookmarks.commandId })
+    .from(bookmarks)
+    .where(eq(bookmarks.userId, profileId))
+  return userBookmarks.map((b) => b.commandId)
+}
+
 type PageProps = {
   params: Promise<{ slug: string }>
 }
@@ -27,12 +82,7 @@ export async function generateMetadata({
 }: PageProps): Promise<Metadata> {
   const { slug } = await params
 
-  const command = await db.query.commands.findFirst({
-    where: eq(commands.slug, slug),
-    with: {
-      category: true,
-    },
-  })
+  const command = await getCommandBySlug(slug)
 
   if (!command) {
     return {
@@ -63,19 +113,10 @@ export default async function CommandDetailPage({ params }: PageProps) {
   const { slug } = await params
   const { userId: clerkId } = await auth()
   const profile = clerkId ? await getUserProfile(clerkId) : null
+  const profileId = profile?.id ?? null
 
   // Fetch main command
-  const command = await db.query.commands.findFirst({
-    where: eq(commands.slug, slug),
-    with: {
-      category: true,
-      tags: {
-        with: {
-          tag: true,
-        },
-      },
-    },
-  })
+  const command = await getCommandBySlug(slug)
 
   if (!command) {
     notFound()
@@ -100,35 +141,14 @@ export default async function CommandDetailPage({ params }: PageProps) {
 
   // Find related commands (same category, only approved)
   const relatedCommands = command.categoryId
-    ? await db.query.commands.findMany({
-        where: and(
-          eq(commands.categoryId, command.categoryId),
-          eq(commands.status, 'approved'),
-        ),
-        limit: 5,
-        with: {
-          category: true,
-          tags: {
-            with: {
-              tag: true,
-            },
-          },
-        },
-      })
+    ? await getRelatedCommands(command.categoryId)
     : []
 
   // Filter out the current command
   const relatedFiltered = relatedCommands.filter((c) => c.id !== command.id)
 
   // Get bookmarked command IDs if user is authenticated
-  let bookmarkedCommandIds: string[] = []
-  if (profile) {
-    const userBookmarks = await db
-      .select({ commandId: bookmarks.commandId })
-      .from(bookmarks)
-      .where(eq(bookmarks.userId, profile.id))
-    bookmarkedCommandIds = userBookmarks.map((b) => b.commandId)
-  }
+  const bookmarkedCommandIds = await getBookmarkedCommandIds(profileId)
 
   // Add isBookmarked flag to command and related commands
   const commandWithBookmark = {

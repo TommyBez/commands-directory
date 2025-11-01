@@ -1,5 +1,6 @@
 import { BookmarkIcon, SearchIcon, ZapIcon } from 'lucide-react'
 import type { Metadata } from 'next'
+import { cacheLife, cacheTag } from 'next/cache'
 import Link from 'next/link'
 import { Suspense } from 'react'
 import { McpModal } from '@/components/mcp-modal'
@@ -26,6 +27,8 @@ export const metadata: Metadata = {
 
 async function getFeaturedCategories() {
   'use cache'
+  cacheTag('categories')
+  cacheLife('days')
   return await db.query.categories.findMany({
     limit: 4,
   })

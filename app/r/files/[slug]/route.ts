@@ -1,3 +1,4 @@
+import { cacheLife, cacheTag } from 'next/cache'
 import { eq } from 'drizzle-orm'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
@@ -13,8 +14,13 @@ export async function GET(
   _request: NextRequest,
   context: RouteContext<'/r/files/[slug]'>,
 ) {
+  'use cache'
+  cacheLife('hours')
+  cacheTag('registry')
   try {
     const { slug } = await context.params
+
+    cacheTag(`registry:item:${slug}`)
 
     // Fetch the command from the database
     const command = await db.query.commands.findFirst({
@@ -30,7 +36,6 @@ export async function GET(
     return new NextResponse(command.content, {
       headers: {
         'Content-Type': 'text/markdown; charset=utf-8',
-        'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
         'Content-Disposition': `inline; filename="${command.slug}.md"`,
       },
     })

@@ -1,3 +1,4 @@
+import { cacheLife, cacheTag } from 'next/cache'
 import { auth } from '@clerk/nextjs/server'
 import { eq } from 'drizzle-orm'
 import { NextResponse } from 'next/server'
@@ -7,6 +8,8 @@ import { getUserProfile } from '@/lib/auth'
 import { logger } from '@/lib/logger'
 
 export async function GET() {
+  'use cache: private'
+  cacheLife('minutes')
   try {
     const { userId: clerkId } = await auth()
 
@@ -18,6 +21,8 @@ export async function GET() {
     if (!profile) {
       return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
     }
+
+    cacheTag(`submissions:user:${profile.id}`)
 
     const userCommands = await db.query.commands.findMany({
       where: eq(commands.submittedByUserId, profile.id),

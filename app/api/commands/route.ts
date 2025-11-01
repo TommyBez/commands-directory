@@ -1,3 +1,4 @@
+import { cacheLife, cacheTag } from 'next/cache'
 import { auth } from '@clerk/nextjs/server'
 import { and, eq, ilike, inArray, or, type SQL, sql } from 'drizzle-orm'
 import type { NextRequest } from 'next/server'
@@ -111,9 +112,14 @@ async function executeCommandsQuery(
 async function getBookmarkedCommandIds(
   profileId: string | null,
 ): Promise<string[]> {
+  'use cache: private'
+  cacheLife('minutes')
+
   if (!profileId) {
     return []
   }
+
+  cacheTag(`bookmarks:user:${profileId}`)
 
   const userBookmarks = await db
     .select({ commandId: bookmarks.commandId })
@@ -124,9 +130,16 @@ async function getBookmarkedCommandIds(
 }
 
 export async function GET(request: NextRequest) {
+  'use cache: private'
+  cacheLife('minutes')
+  cacheTag('commands')
   try {
     const { userId: clerkId } = await auth()
     const profile = clerkId ? await getUserProfile(clerkId) : null
+
+    if (profile?.id) {
+      cacheTag(`bookmarks:user:${profile.id}`)
+    }
     const { q, category, tag, page, limit, offset } = parseQueryParams(
       request.nextUrl.searchParams,
     )

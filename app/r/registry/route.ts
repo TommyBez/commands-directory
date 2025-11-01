@@ -1,3 +1,4 @@
+import { cacheLife, cacheTag } from 'next/cache'
 import { eq } from 'drizzle-orm'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
@@ -11,6 +12,9 @@ import { logger } from '@/lib/logger'
  * Following the registry spec from https://ui.shadcn.com/schema/registry.json
  */
 export async function GET(_request: NextRequest) {
+  'use cache'
+  cacheLife('hours')
+  cacheTag('registry')
   try {
     // Get the base URL for homepage
     const baseUrl =
@@ -86,12 +90,7 @@ export async function GET(_request: NextRequest) {
       items: registryItems,
     }
 
-    return NextResponse.json(registry, {
-      headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
-      },
-    })
+    return NextResponse.json(registry)
   } catch (error) {
     logger.error('Error fetching registry:', error)
     return NextResponse.json(

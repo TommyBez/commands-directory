@@ -1,3 +1,4 @@
+import { cacheLife, cacheTag } from 'next/cache'
 import { auth } from '@clerk/nextjs/server'
 import { eq } from 'drizzle-orm'
 import type { Metadata } from 'next'
@@ -24,20 +25,13 @@ export const metadata: Metadata = {
   },
 }
 
-export default async function FavoritesPage() {
-  const { userId: clerkId } = await auth()
+async function getUserBookmarks(profileId: string) {
+  'use cache: private'
+  cacheTag(`bookmarks:user:${profileId}`)
+  cacheLife('minutes')
 
-  if (!clerkId) {
-    redirect('/sign-in?redirect_url=/favorites')
-  }
-
-  const profile = await getUserProfile(clerkId)
-  if (!profile) {
-    redirect('/sign-in?redirect_url=/favorites')
-  }
-
-  const userBookmarks = await db.query.bookmarks.findMany({
-    where: eq(bookmarks.userId, profile.id),
+  return await db.query.bookmarks.findMany({
+    where: eq(bookmarks.userId, profileId),
     with: {
       command: {
         with: {
@@ -52,6 +46,21 @@ export default async function FavoritesPage() {
     },
     orderBy: (table, { desc }) => [desc(table.createdAt)],
   })
+}
+
+export default async function FavoritesPage() {
+  const { userId: clerkId } = await auth()
+
+  if (!clerkId) {
+    redirect('/sign-in?redirect_url=/favorites')
+  }
+
+  const profile = await getUserProfile(clerkId)
+  if (!profile) {
+    redirect('/sign-in?redirect_url=/favorites')
+  }
+
+  const userBookmarks = await getUserBookmarks(profile.id)
 
   return (
     <main className="container mx-auto flex-1 px-4 py-6 sm:py-8">

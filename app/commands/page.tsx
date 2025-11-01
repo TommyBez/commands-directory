@@ -1,6 +1,7 @@
 import { auth } from '@clerk/nextjs/server'
 import { and, eq, ilike, inArray, or, type SQL, sql } from 'drizzle-orm'
 import type { Metadata } from 'next'
+import { cacheLife, cacheTag } from 'next/cache'
 import Link from 'next/link'
 import type { SearchParams } from 'nuqs/server'
 import { CommandCard } from '@/components/command-card'
@@ -80,16 +81,22 @@ async function buildWhereConditions(params: {
   return conditions.length > 0 ? and(...conditions) : undefined
 }
 
-async function getBookmarkedCommandIds(): Promise<string[]> {
-  const { userId: clerkId } = await auth()
-  const profile = clerkId ? await getUserProfile(clerkId) : null
-  if (!profile?.id) {
+async function getBookmarkedCommandIds(
+  profileId: string | null,
+): Promise<string[]> {
+  'use cache: private'
+  cacheLife('minutes')
+
+  if (!profileId) {
     return []
   }
+
+  cacheTag(`bookmarks:user:${profileId}`)
+
   const userBookmarks = await db
     .select({ commandId: bookmarks.commandId })
     .from(bookmarks)
-    .where(eq(bookmarks.userId, profile.id))
+    .where(eq(bookmarks.userId, profileId))
   return userBookmarks.map((b) => b.commandId)
 }
 
@@ -106,6 +113,9 @@ async function getCommands({
   page: number
   limit: number
 }) {
+  'use cache'
+  cacheTag('commands')
+  cacheLife('minutes')
   const whereClause = await buildWhereConditions({ q, category, tag })
   return await db.query.commands.findMany({
     where: whereClause,
@@ -132,6 +142,9 @@ async function getTotalCount({
   category: string
   tag: string
 }) {
+  'use cache'
+  cacheTag('commands')
+  cacheLife('minutes')
   const whereClause = await buildWhereConditions({ q, category, tag })
   return await db
     .select({ count: sql<number>`count(*)` })
@@ -146,10 +159,14 @@ export default async function CommandsPage({ searchParams }: PageProps) {
     await loadCommandsSearchParams(searchParams)
   const limit = 20
 
+  const { userId: clerkId } = await auth()
+  const profile = clerkId ? await getUserProfile(clerkId) : null
+  const profileId = profile?.id ?? null
+
   const [results, totalCount, bookmarkedCommandIds] = await Promise.all([
     getCommands({ q, category, tag, page, limit }),
     getTotalCount({ q, category, tag }),
-    getBookmarkedCommandIds(),
+    getBookmarkedCommandIds(profileId),
   ])
 
   const commandsWithBookmarks = results.map((command) => ({

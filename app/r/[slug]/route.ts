@@ -1,3 +1,4 @@
+import { cacheLife, cacheTag } from 'next/cache'
 import { eq } from 'drizzle-orm'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
@@ -16,11 +17,16 @@ export async function GET(
   _request: NextRequest,
   context: RouteContext<'/r/[slug]'>,
 ) {
+  'use cache'
+  cacheLife('hours')
+  cacheTag('registry')
   try {
     const { slug } = await context.params
 
     // Remove .json postfix from slug if present
     const cleanSlug = slug.replace(JSON_POSTFIX_REGEX, '')
+
+    cacheTag(`registry:item:${cleanSlug}`)
 
     // Fetch the command from the database
     const command = await db.query.commands.findFirst({
@@ -90,12 +96,7 @@ export async function GET(
         : undefined,
     }
 
-    return NextResponse.json(registryItem, {
-      headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
-      },
-    })
+    return NextResponse.json(registryItem)
   } catch (error) {
     logger.error('Error fetching registry item:', error)
     return NextResponse.json(

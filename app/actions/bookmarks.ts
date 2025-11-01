@@ -2,8 +2,10 @@
 
 import { auth } from '@clerk/nextjs/server'
 import { and, eq } from 'drizzle-orm'
+import { revalidateTag } from 'next/cache'
 import { db } from '@/db'
 import { bookmarks } from '@/db/schema/bookmarks'
+import { commands } from '@/db/schema/commands'
 import { getUserProfile } from '@/lib/auth'
 import { logger } from '@/lib/logger'
 
@@ -51,6 +53,17 @@ export async function addBookmark(commandId: string): Promise<BookmarkResult> {
       .values({ userId: profile.id, commandId })
       .returning()
 
+    // Query command to get slug for cache invalidation
+    const command = await db.query.commands.findFirst({
+      where: eq(commands.id, commandId),
+      columns: { slug: true },
+    })
+
+    revalidateTag(`bookmarks:user:${profile.id}`)
+    if (command?.slug) {
+      revalidateTag(`command:${command.slug}`)
+    }
+
     return { ok: true, data: bookmark }
   } catch (error) {
     logger.error('Error creating bookmark:', error)
@@ -77,6 +90,12 @@ export async function deleteBookmark(
       return { ok: false, error: 'commandId is required', status: 400 }
     }
 
+    // Query command to get slug for cache invalidation before deletion
+    const command = await db.query.commands.findFirst({
+      where: eq(commands.id, commandId),
+      columns: { slug: true },
+    })
+
     await db
       .delete(bookmarks)
       .where(
@@ -85,6 +104,11 @@ export async function deleteBookmark(
           eq(bookmarks.commandId, commandId),
         ),
       )
+
+    revalidateTag(`bookmarks:user:${profile.id}`)
+    if (command?.slug) {
+      revalidateTag(`command:${command.slug}`)
+    }
 
     return { ok: true }
   } catch (error) {

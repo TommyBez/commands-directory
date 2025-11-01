@@ -1,3 +1,4 @@
+import { cacheLife, cacheTag } from 'next/cache'
 import { auth } from '@clerk/nextjs/server'
 import { eq } from 'drizzle-orm'
 import type { Metadata } from 'next'
@@ -25,6 +26,25 @@ export const metadata: Metadata = {
   },
 }
 
+async function getUserCommands(profileId: string) {
+  'use cache: private'
+  cacheTag(`submissions:user:${profileId}`)
+  cacheLife('minutes')
+
+  return await db.query.commands.findMany({
+    where: eq(commands.submittedByUserId, profileId),
+    with: {
+      category: true,
+      tags: {
+        with: {
+          tag: true,
+        },
+      },
+    },
+    orderBy: (table, { desc }) => [desc(table.createdAt)],
+  })
+}
+
 export default async function SubmissionsPage() {
   const { userId: clerkId } = await auth()
 
@@ -37,18 +57,7 @@ export default async function SubmissionsPage() {
     redirect('/sign-in')
   }
 
-  const userCommands = await db.query.commands.findMany({
-    where: eq(commands.submittedByUserId, profile.id),
-    with: {
-      category: true,
-      tags: {
-        with: {
-          tag: true,
-        },
-      },
-    },
-    orderBy: (table, { desc }) => [desc(table.createdAt)],
-  })
+  const userCommands = await getUserCommands(profile.id)
 
   const getStatusColor = (status: string) => {
     switch (status) {
