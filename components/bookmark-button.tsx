@@ -1,14 +1,15 @@
 'use client'
 
-import { useAuth, useUser } from '@clerk/nextjs'
+import { useUser } from '@clerk/nextjs'
 import { Heart } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import { addBookmark, deleteBookmark } from '@/app/actions/bookmarks'
 import { Button } from '@/components/ui/button'
 import { logger } from '@/lib/logger'
 
-const BOOKMARK_ALREADY_EXISTS_STATUS = 409
+const HTTP_STATUS_CONFLICT = 409
 
 type BookmarkButtonProps = {
   commandId: string
@@ -26,7 +27,6 @@ export function BookmarkButton({
   showText = false,
 }: BookmarkButtonProps) {
   const { isSignedIn } = useUser()
-  const { getToken } = useAuth()
   const router = useRouter()
   const [isBookmarked, setIsBookmarked] = useState(initialBookmarked)
   const [isLoading, setIsLoading] = useState(false)
@@ -44,17 +44,26 @@ export function BookmarkButton({
     return true
   }
 
-  const handleBookmarkResponse = async (response: Response) => {
-    if (!response.ok) {
-      const data = await response.json()
-      if (response.status === BOOKMARK_ALREADY_EXISTS_STATUS && !isBookmarked) {
-        setIsBookmarked(true)
-        toast.info('Command is already in your favorites')
-        return { success: true }
-      }
-      throw new Error(data.error || 'Failed to update bookmark')
+  const handleBookmarkSuccess = () => {
+    setIsBookmarked(!isBookmarked)
+    toast.success(
+      isBookmarked ? 'Removed from favorites' : 'Added to favorites',
+    )
+    router.refresh()
+  }
+
+  const handleBookmarkError = (result: {
+    ok: boolean
+    status?: number
+    error?: string
+  }) => {
+    if (result.status === HTTP_STATUS_CONFLICT && !isBookmarked) {
+      setIsBookmarked(true)
+      toast.info('Command is already in your favorites')
+      return true
     }
-    return { success: false }
+    toast.error(result.error || 'Failed to update bookmark')
+    return false
   }
 
   const handleToggleBookmark = async (e: React.MouseEvent) => {
@@ -68,28 +77,16 @@ export function BookmarkButton({
     setIsLoading(true)
 
     try {
-      const token = await getToken()
-      const method = isBookmarked ? 'DELETE' : 'POST'
+      const result = isBookmarked
+        ? await deleteBookmark(commandId)
+        : await addBookmark(commandId)
 
-      const response = await fetch('/api/bookmarks', {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ commandId }),
-      })
-
-      const result = await handleBookmarkResponse(response)
-      if (result.success) {
+      if (!result.ok) {
+        handleBookmarkError(result)
         return
       }
 
-      setIsBookmarked(!isBookmarked)
-      toast.success(
-        isBookmarked ? 'Removed from favorites' : 'Added to favorites',
-      )
-      router.refresh()
+      handleBookmarkSuccess()
     } catch (error) {
       logger.error('Error toggling bookmark:', error)
       toast.error('Failed to update bookmark')

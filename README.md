@@ -130,13 +130,11 @@ Visit [http://localhost:3000](http://localhost:3000) to see the application.
 
 ### Commands
 - `GET /api/commands` - List commands with search & filters
-- `GET /api/commands/[slug]` - Get command details
-- `POST /api/commands` - Submit new command (auth required)
+- Server Action `submitCommand` - Submit new command (auth required)
 
 ### Bookmarks
-- `GET /api/bookmarks` - Get user bookmarks (auth required)
-- `POST /api/bookmarks` - Add bookmark (auth required)
-- `DELETE /api/bookmarks` - Remove bookmark (auth required)
+- Server Action `addBookmark` - Add bookmark (auth required)
+- Server Action `deleteBookmark` - Remove bookmark (auth required)
 
 ### Admin
 - `GET /api/admin/commands` - Admin command management
