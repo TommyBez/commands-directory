@@ -1,9 +1,11 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { Suspense } from 'react'
 import { McpModal } from '@/components/mcp-modal'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { SidebarTrigger } from '@/components/ui/sidebar'
 import { UserButtons } from '@/components/user-buttons'
+import { UserButtonsSkeleton } from '@/components/user-buttons-skeleton'
 
 export function Header() {
   return (
@@ -24,7 +26,9 @@ export function Header() {
         </Link>
         <div className="flex items-center gap-1 sm:gap-2">
           <McpModal />
-          <UserButtons />
+          <Suspense fallback={<UserButtonsSkeleton />}>
+            <UserButtons />
+          </Suspense>
           <ThemeToggle />
         </div>
       </div>

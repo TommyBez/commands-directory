@@ -4,7 +4,7 @@ import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { ThemeProvider } from 'next-themes'
 import { NuqsAdapter } from 'nuqs/adapters/next/app'
-import { AppSidebarWrapper } from '@/components/app-sidebar-wrapper'
+import { AppSidebar } from '@/components/app-sidebar'
 import { Footer } from '@/components/footer'
 import { Header } from '@/components/header'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
@@ -81,7 +81,7 @@ export default function RootLayout({
               enableSystem
             >
               <SidebarProvider defaultOpen={false}>
-                <AppSidebarWrapper />
+                <AppSidebar />
                 <SidebarInset>
                   <Header />
                   <div className="flex min-h-[calc(100vh-4rem)] flex-1 flex-col">

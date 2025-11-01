@@ -24,10 +24,15 @@ export const metadata: Metadata = {
   },
 }
 
-export default async function Home() {
-  const featuredCategories = await db.query.categories.findMany({
+async function getFeaturedCategories() {
+  'use cache'
+  return await db.query.categories.findMany({
     limit: 4,
   })
+}
+
+export default async function Home() {
+  const featuredCategories = await getFeaturedCategories()
 
   return (
     <main className="flex-1">
