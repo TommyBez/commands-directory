@@ -1,7 +1,7 @@
-import { cacheLife, cacheTag } from 'next/cache'
 import { auth } from '@clerk/nextjs/server'
 import { and, eq } from 'drizzle-orm'
 import type { Metadata } from 'next'
+import { cacheLife, cacheTag } from 'next/cache'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { BookmarkButton } from '@/components/bookmark-button'
@@ -43,7 +43,10 @@ async function getRelatedCommands(categoryId: string) {
   cacheLife('hours')
 
   return await db.query.commands.findMany({
-    where: and(eq(commands.categoryId, categoryId), eq(commands.status, 'approved')),
+    where: and(
+      eq(commands.categoryId, categoryId),
+      eq(commands.status, 'approved'),
+    ),
     limit: 5,
     with: {
       category: true,
