@@ -16,7 +16,7 @@
     "test:e2e": "playwright test --headed=false"
   },
   "dependencies": {
-    "@clerk/nextjs": "^6.34.0",
+    "@clerk/nextjs": "^6.34.1",
     "@hookform/resolvers": "^5.2.2",
     "@icons-pack/react-simple-icons": "^13.8.0",
     "@neondatabase/serverless": "^1.0.2",
