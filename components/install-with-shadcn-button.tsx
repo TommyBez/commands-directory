@@ -4,6 +4,11 @@ import { CheckIcon } from 'lucide-react'
 import Image from 'next/image'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 const COPY_TIMEOUT = 2000
 
@@ -32,7 +37,8 @@ export function InstallWithShadcnButton({
     setTimeout(() => setCopied(false), COPY_TIMEOUT)
   }
 
-  return (
+  const isIconOnly = !showText || size === 'icon'
+  const button = (
     <Button onClick={handleCopy} size={size} variant={variant}>
       {copied ? (
         <>
@@ -53,4 +59,19 @@ export function InstallWithShadcnButton({
       )}
     </Button>
   )
+
+  if (isIconOnly) {
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          {button}
+        </TooltipTrigger>
+        <TooltipContent>
+          {copied ? 'Copied!' : 'Install with shadcn'}
+        </TooltipContent>
+      </Tooltip>
+    )
+  }
+
+  return button
 }
