@@ -1,14 +1,15 @@
-import { auth } from '@clerk/nextjs/server'
 import { eq } from 'drizzle-orm'
+import { unstable_noStore } from 'next/cache'
 import { NextResponse } from 'next/server'
 import { db } from '@/db'
 import { commands } from '@/db/schema/commands'
-import { getUserProfile } from '@/lib/auth'
+import { getOptionalClerkId, getUserProfile } from '@/lib/auth'
 import { logger } from '@/lib/logger'
 
 export async function GET() {
   try {
-    const { userId: clerkId } = await auth()
+    unstable_noStore()
+    const clerkId = await getOptionalClerkId()
 
     if (!clerkId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

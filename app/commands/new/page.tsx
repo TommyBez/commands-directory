@@ -1,8 +1,9 @@
-import { auth } from '@clerk/nextjs/server'
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
+import { unstable_noStore } from 'next/cache'
 import { SubmitCommandForm } from '@/components/submit-command-form'
 import { db } from '@/db'
+import { getOptionalClerkId } from '@/lib/auth'
 
 export const metadata: Metadata = {
   title: 'Submit a Command',
@@ -16,9 +17,10 @@ export const metadata: Metadata = {
 }
 
 export default async function NewCommandPage() {
-  const { userId } = await auth()
+  unstable_noStore()
+  const clerkId = await getOptionalClerkId()
 
-  if (!userId) {
+  if (!clerkId) {
     redirect('/sign-in')
   }
 
@@ -36,7 +38,6 @@ export default async function NewCommandPage() {
             reviewed by an administrator before being published.
           </p>
         </div>
-
         <SubmitCommandForm categories={categories} />
       </div>
     </main>

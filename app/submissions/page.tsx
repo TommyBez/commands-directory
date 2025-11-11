@@ -1,14 +1,14 @@
-import { auth } from '@clerk/nextjs/server'
 import { eq } from 'drizzle-orm'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import { unstable_noStore } from 'next/cache'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { db } from '@/db'
 import { commands } from '@/db/schema/commands'
-import { getUserProfile } from '@/lib/auth'
+import { getOptionalClerkId, getUserProfile } from '@/lib/auth'
 
 export const metadata: Metadata = {
   title: 'My Submissions',
@@ -26,7 +26,8 @@ export const metadata: Metadata = {
 }
 
 export default async function SubmissionsPage() {
-  const { userId: clerkId } = await auth()
+  unstable_noStore()
+  const clerkId = await getOptionalClerkId()
 
   if (!clerkId) {
     redirect('/sign-in')

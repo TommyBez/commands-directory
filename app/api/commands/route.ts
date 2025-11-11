@@ -1,5 +1,5 @@
-import { auth } from '@clerk/nextjs/server'
 import { and, eq, ilike, inArray, or, type SQL, sql } from 'drizzle-orm'
+import { unstable_noStore } from 'next/cache'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { db } from '@/db'
@@ -7,8 +7,32 @@ import { bookmarks } from '@/db/schema/bookmarks'
 import { categories } from '@/db/schema/categories'
 import { commandTagMap, commandTags } from '@/db/schema/command-tags'
 import { commands } from '@/db/schema/commands'
-import { getUserProfile } from '@/lib/auth'
+import { getOptionalClerkId, getUserProfile } from '@/lib/auth'
 import { logger } from '@/lib/logger'
+
+function isPrerenderBailoutError(error: unknown): error is Error {
+  if (error instanceof Error) {
+    const message = error.message ?? ''
+    return (
+      message.includes('needs to bail out of prerendering') ||
+      message.includes('NEXT_PRERENDER_INTERRUPTED')
+    )
+  }
+  return false
+}
+
+function createEmptyResponse() {
+  const defaults = parseQueryParams(new URLSearchParams())
+  return {
+    data: [],
+    pagination: {
+      page: defaults.page,
+      limit: defaults.limit,
+      total: 0,
+      totalPages: 0,
+    },
+  }
+}
 
 function parseQueryParams(searchParams: URLSearchParams) {
   const q = searchParams.get('q')
@@ -125,11 +149,29 @@ async function getBookmarkedCommandIds(
 
 export async function GET(request: NextRequest) {
   try {
-    const { userId: clerkId } = await auth()
+    unstable_noStore()
+    const clerkId = await getOptionalClerkId()
     const profile = clerkId ? await getUserProfile(clerkId) : null
-    const { q, category, tag, page, limit, offset } = parseQueryParams(
-      request.nextUrl.searchParams,
-    )
+    let queryParams: ReturnType<typeof parseQueryParams>
+
+    try {
+      const requestUrl = new URL(request.url)
+      queryParams = parseQueryParams(requestUrl.searchParams)
+    } catch (error) {
+      if (isPrerenderBailoutError(error)) {
+        logger.debug(
+          'Skipping commands pre-render due to dynamic search parameters.',
+        )
+        return NextResponse.json(createEmptyResponse(), {
+          headers: {
+            'Cache-Control': 'no-store',
+          },
+        })
+      }
+      throw error
+    }
+
+    const { q, category, tag, page, limit, offset } = queryParams
 
     const conditions = await buildWhereConditions(q, category, tag)
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined
@@ -143,7 +185,6 @@ export async function GET(request: NextRequest) {
       profile?.id ?? null,
     )
 
-    // Add isBookmarked flag to each command
     const commandsWithBookmarks = results.map((command) => ({
       ...command,
       isBookmarked: bookmarkedCommandIds.includes(command.id),
@@ -159,6 +200,17 @@ export async function GET(request: NextRequest) {
       },
     })
   } catch (error) {
+    if (isPrerenderBailoutError(error)) {
+      logger.debug(
+        'Skipping commands pre-render due to dynamic usage after query execution.',
+      )
+      return NextResponse.json(createEmptyResponse(), {
+        headers: {
+          'Cache-Control': 'no-store',
+        },
+      })
+    }
+
     logger.error('Error fetching commands:', error)
     return NextResponse.json(
       { error: 'Failed to fetch commands' },

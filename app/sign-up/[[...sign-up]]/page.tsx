@@ -1,5 +1,5 @@
-import { SignUp } from '@clerk/nextjs'
 import type { Metadata } from 'next'
+import { SignUpShell } from './sign-up-shell'
 
 export const metadata: Metadata = {
   title: 'Sign Up',
@@ -17,9 +17,5 @@ export const metadata: Metadata = {
 }
 
 export default function Page() {
-  return (
-    <div className="flex min-h-screen items-center justify-center">
-      <SignUp />
-    </div>
-  )
+  return <SignUpShell />
 }
