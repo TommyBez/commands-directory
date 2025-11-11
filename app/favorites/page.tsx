@@ -1,13 +1,13 @@
-import { auth } from '@clerk/nextjs/server'
 import { eq } from 'drizzle-orm'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import { unstable_noStore } from 'next/cache'
 import { CommandCard } from '@/components/command-card'
 import { Button } from '@/components/ui/button'
 import { db } from '@/db'
 import { bookmarks } from '@/db/schema/bookmarks'
-import { getUserProfile } from '@/lib/auth'
+import { getOptionalClerkId, getUserProfile } from '@/lib/auth'
 
 export const metadata: Metadata = {
   title: 'My Favorites',
@@ -25,7 +25,8 @@ export const metadata: Metadata = {
 }
 
 export default async function FavoritesPage() {
-  const { userId: clerkId } = await auth()
+  unstable_noStore()
+  const clerkId = await getOptionalClerkId()
 
   if (!clerkId) {
     redirect('/sign-in?redirect_url=/favorites')

@@ -1,4 +1,4 @@
-import { auth } from '@clerk/nextjs/server'
+import { unstable_noStore } from 'next/cache'
 import { SidebarMenuItemLink } from '@/components/sidebar-menu-item'
 import {
   SidebarGroup,
@@ -8,7 +8,7 @@ import {
   SidebarMenuSkeleton,
 } from '@/components/ui/sidebar'
 import { Skeleton } from '@/components/ui/skeleton'
-import { getUserProfile } from '@/lib/auth'
+import { getOptionalClerkId, getUserProfile } from '@/lib/auth'
 
 const adminNavItems = [
   {
@@ -36,7 +36,8 @@ export function AdminSidebarGroupSkeleton() {
 }
 
 export async function AdminSidebarGroup() {
-  const { userId: clerkId } = await auth()
+  unstable_noStore()
+  const clerkId = await getOptionalClerkId()
   if (!clerkId) {
     return null
   }

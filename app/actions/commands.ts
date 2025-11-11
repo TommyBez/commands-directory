@@ -1,12 +1,15 @@
 'use server'
 
 import { randomUUID } from 'node:crypto'
-import { auth } from '@clerk/nextjs/server'
 import { eq } from 'drizzle-orm'
 import { db } from '@/db'
 import { categories } from '@/db/schema/categories'
 import { commands } from '@/db/schema/commands'
-import { checkAdminAccess, getUserProfile } from '@/lib/auth'
+import {
+  checkAdminAccess,
+  getOptionalClerkId,
+  getUserProfile,
+} from '@/lib/auth'
 import { logger } from '@/lib/logger'
 
 const MAX_TITLE_LENGTH = 200
@@ -144,12 +147,12 @@ async function insertCommandWithRetry(params: {
 export async function submitCommand(
   input: SubmitCommandInput,
 ): Promise<SubmitResult> {
-  const { userId } = await auth()
-  if (!userId) {
+  const clerkId = await getOptionalClerkId()
+  if (!clerkId) {
     return { ok: false, error: 'Unauthorized', status: 401 }
   }
 
-  const profile = await getUserProfile(userId)
+  const profile = await getUserProfile(clerkId)
   if (!profile) {
     return { ok: false, error: 'Profile not found', status: 404 }
   }
@@ -192,7 +195,7 @@ export async function submitCommand(
 
 export async function approveCommand(commandId: string): Promise<SubmitResult> {
   try {
-    const { userId: clerkId } = await auth()
+    const clerkId = await getOptionalClerkId()
 
     if (!clerkId) {
       return { ok: false, error: 'Unauthorized', status: 401 }
@@ -241,7 +244,7 @@ export async function rejectCommand(
   reason: string | null,
 ): Promise<SubmitResult> {
   try {
-    const { userId: clerkId } = await auth()
+    const clerkId = await getOptionalClerkId()
 
     if (!clerkId) {
       return { ok: false, error: 'Unauthorized', status: 401 }
@@ -289,7 +292,7 @@ type DeleteResult = { ok: true } | { ok: false; error: string; status?: number }
 
 export async function deleteCommand(commandId: string): Promise<DeleteResult> {
   try {
-    const { userId: clerkId } = await auth()
+    const clerkId = await getOptionalClerkId()
 
     if (!clerkId) {
       return { ok: false, error: 'Unauthorized', status: 401 }

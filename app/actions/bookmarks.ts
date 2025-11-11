@@ -1,10 +1,9 @@
 'use server'
 
-import { auth } from '@clerk/nextjs/server'
 import { and, eq } from 'drizzle-orm'
 import { db } from '@/db'
 import { bookmarks } from '@/db/schema/bookmarks'
-import { getUserProfile } from '@/lib/auth'
+import { getOptionalClerkId, getUserProfile } from '@/lib/auth'
 import { logger } from '@/lib/logger'
 
 type BookmarkRecord = typeof bookmarks.$inferSelect
@@ -19,7 +18,7 @@ type DeleteBookmarkResult =
 
 export async function addBookmark(commandId: string): Promise<BookmarkResult> {
   try {
-    const { userId: clerkId } = await auth()
+    const clerkId = await getOptionalClerkId()
 
     if (!clerkId) {
       return { ok: false, error: 'Unauthorized', status: 401 }
@@ -62,7 +61,7 @@ export async function deleteBookmark(
   commandId: string,
 ): Promise<DeleteBookmarkResult> {
   try {
-    const { userId: clerkId } = await auth()
+    const clerkId = await getOptionalClerkId()
 
     if (!clerkId) {
       return { ok: false, error: 'Unauthorized', status: 401 }

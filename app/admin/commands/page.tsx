@@ -1,13 +1,13 @@
-import { auth } from '@clerk/nextjs/server'
 import { eq } from 'drizzle-orm'
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
+import { unstable_noStore } from 'next/cache'
 import { CommandModerationCard } from '@/components/command-moderation-card'
 import { Card, CardContent } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { db } from '@/db'
 import { commands } from '@/db/schema/commands'
-import { getUserProfile } from '@/lib/auth'
+import { getOptionalClerkId, getUserProfile } from '@/lib/auth'
 
 export const metadata: Metadata = {
   title: 'Command Moderation',
@@ -23,7 +23,8 @@ export const metadata: Metadata = {
 }
 
 export default async function AdminCommandsPage() {
-  const { userId: clerkId } = await auth()
+  unstable_noStore()
+  const clerkId = await getOptionalClerkId()
 
   if (!clerkId) {
     redirect('/sign-in')

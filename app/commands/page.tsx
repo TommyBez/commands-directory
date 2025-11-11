@@ -1,5 +1,5 @@
-import { auth } from '@clerk/nextjs/server'
 import { and, eq, ilike, inArray, or, type SQL, sql } from 'drizzle-orm'
+import { unstable_noStore } from 'next/cache'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import type { SearchParams } from 'nuqs/server'
@@ -12,7 +12,7 @@ import { bookmarks } from '@/db/schema/bookmarks'
 import { categories } from '@/db/schema/categories'
 import { commandTagMap, commandTags } from '@/db/schema/command-tags'
 import { commands } from '@/db/schema/commands'
-import { getUserProfile } from '@/lib/auth'
+import { getOptionalClerkId, getUserProfile } from '@/lib/auth'
 import { loadCommandsSearchParams } from '@/lib/search-params'
 
 export const metadata: Metadata = {
@@ -81,7 +81,7 @@ async function buildWhereConditions(params: {
 }
 
 async function getBookmarkedCommandIds(): Promise<string[]> {
-  const { userId: clerkId } = await auth()
+  const clerkId = await getOptionalClerkId()
   const profile = clerkId ? await getUserProfile(clerkId) : null
   if (!profile?.id) {
     return []
@@ -142,6 +142,7 @@ async function getTotalCount({
 
 export default async function CommandsPage({ searchParams }: PageProps) {
   // Load and parse search params using nuqs loader
+  unstable_noStore()
   const { q, category, tag, page } =
     await loadCommandsSearchParams(searchParams)
   const limit = 20

@@ -1,5 +1,5 @@
-import { SignIn } from '@clerk/nextjs'
 import type { Metadata } from 'next'
+import { SignInShell } from './sign-in-shell'
 
 export const metadata: Metadata = {
   title: 'Sign In',
@@ -17,9 +17,5 @@ export const metadata: Metadata = {
 }
 
 export default function Page() {
-  return (
-    <div className="flex min-h-screen items-center justify-center">
-      <SignIn />
-    </div>
-  )
+  return <SignInShell />
 }

@@ -1,9 +1,60 @@
 import { eq } from 'drizzle-orm'
+import { unstable_noStore } from 'next/cache'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { db } from '@/db'
 import { commands } from '@/db/schema/commands'
 import { logger } from '@/lib/logger'
+
+function resolveBaseUrl(): string {
+  return (
+    process.env.NEXT_PUBLIC_APP_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined) ||
+    'http://localhost:3000'
+  )
+}
+
+function createEmptyRegistry(baseUrl: string) {
+  return {
+    $schema: 'https://ui.shadcn.com/schema/registry.json',
+    name: 'cursor-commands',
+    homepage: baseUrl,
+    items: [] as unknown[],
+  }
+}
+
+function isPrerenderingCacheError(error: unknown): boolean {
+  if (!error || typeof error !== 'object') {
+    return false
+  }
+
+  const maybeError = error as Error & {
+    cause?: unknown
+    digest?: string
+  }
+
+  const message = maybeError.message ?? ''
+  if (
+    message.includes('During prerendering') ||
+    message.includes('NEXT_PRERENDER_INTERRUPTED') ||
+    message.includes('HANGING_PROMISE_REJECTION')
+  ) {
+    return true
+  }
+
+  if (typeof maybeError.digest === 'string') {
+    const digest = maybeError.digest
+    if (digest.includes('HANGING_PROMISE_REJECTION')) {
+      return true
+    }
+  }
+
+  if (maybeError.cause) {
+    return isPrerenderingCacheError(maybeError.cause)
+  }
+
+  return false
+}
 
 /**
  * GET /api/registry
@@ -11,13 +62,10 @@ import { logger } from '@/lib/logger'
  * Following the registry spec from https://ui.shadcn.com/schema/registry.json
  */
 export async function GET(_request: NextRequest) {
-  try {
-    // Get the base URL for homepage
-    const baseUrl =
-      process.env.NEXT_PUBLIC_APP_URL ||
-      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
-      'http://localhost:3000'
+  unstable_noStore()
+  const baseUrl = resolveBaseUrl()
 
+  try {
     // Fetch all approved commands with their relationships
     const approvedCommands = await db.query.commands.findMany({
       where: eq(commands.status, 'approved'),
@@ -60,9 +108,7 @@ export async function GET(_request: NextRequest) {
             target: `~/.cursor/commands/${command.slug}.md`,
           },
         ],
-        // Add categories for filtering
         ...(categories.length > 0 && { categories }),
-        // Add metadata
         meta: {
           categoryName: command.category?.name,
           tags: command.tags.map((t) => ({
@@ -78,7 +124,6 @@ export async function GET(_request: NextRequest) {
       }
     })
 
-    // Build the complete registry following registry.json schema
     const registry = {
       $schema: 'https://ui.shadcn.com/schema/registry.json',
       name: 'cursor-commands',
@@ -93,6 +138,18 @@ export async function GET(_request: NextRequest) {
       },
     })
   } catch (error) {
+    if (isPrerenderingCacheError(error)) {
+      logger.debug(
+        'Registry generation skipped during prerender; returning empty dataset.',
+      )
+      return NextResponse.json(createEmptyRegistry(baseUrl), {
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-store',
+        },
+      })
+    }
+
     logger.error('Error fetching registry:', error)
     return NextResponse.json(
       { error: 'Failed to fetch registry' },
