@@ -62,9 +62,9 @@ export function CommandCard({
           <CardDescription className="line-clamp-2">
             {command.description || contentPreview}
           </CardDescription>
-          {command.submittedBy && (
+          {!!command.submittedBy?.username && (
             <div className="pt-1 text-muted-foreground text-xs">
-              By {command.submittedBy.username || 'Anonymous'}
+              By {command.submittedBy.username}
             </div>
           )}
         </CardHeader>
