@@ -21,7 +21,6 @@ import {
 import { db } from '@/db'
 
 async function getCategories() {
-  'use cache'
   return await db.query.categories.findMany({
     orderBy: (categoryTable, { asc }) => [asc(categoryTable.name)],
   })
