@@ -80,76 +80,53 @@ async function buildWhereConditions(params: {
   return conditions.length > 0 ? and(...conditions) : undefined
 }
 
-async function getBookmarkedCommandIds(): Promise<string[]> {
-  const { userId: clerkId } = await auth()
-  const profile = clerkId ? await getUserProfile(clerkId) : null
-  if (!profile?.id) {
+async function getBookmarkedCommandIds(
+  profileId: string | null,
+): Promise<string[]> {
+  if (!profileId) {
     return []
   }
   const userBookmarks = await db
     .select({ commandId: bookmarks.commandId })
     .from(bookmarks)
-    .where(eq(bookmarks.userId, profile.id))
+    .where(eq(bookmarks.userId, profileId))
   return userBookmarks.map((b) => b.commandId)
 }
 
-async function getCommands({
-  q,
-  category,
-  tag,
-  page,
-  limit,
-}: {
-  q: string
-  category: string
-  tag: string
-  page: number
-  limit: number
-}) {
-  const whereClause = await buildWhereConditions({ q, category, tag })
-  return await db.query.commands.findMany({
-    where: whereClause,
-    limit,
-    offset: (page - 1) * limit,
-    with: {
-      category: true,
-      tags: {
-        with: {
-          tag: true,
-        },
-      },
-    },
-    orderBy: (table, { desc }) => [desc(table.createdAt)],
-  })
-}
-
-async function getTotalCount({
-  q,
-  category,
-  tag,
-}: {
-  q: string
-  category: string
-  tag: string
-}) {
-  const whereClause = await buildWhereConditions({ q, category, tag })
-  return await db
-    .select({ count: sql<number>`count(*)` })
-    .from(commands)
-    .where(whereClause)
-    .then((res) => Number(res[0]?.count || 0))
-}
-
 export default async function CommandsPage({ searchParams }: PageProps) {
+  const { userId: clerkId } = await auth()
+  const profile = clerkId ? await getUserProfile(clerkId) : null
+
   // Load and parse search params using nuqs loader
   const { q, category, tag, page } =
     await loadCommandsSearchParams(searchParams)
   const limit = 20
+  const offset = (page - 1) * limit
+
+  const whereClause = await buildWhereConditions({ q, category, tag })
 
   const [results, totalCount, bookmarkedCommandIds] = await Promise.all([
-    getCommands({ q, category, tag, page, limit }),
-    getTotalCount({ q, category, tag }),
-    getBookmarkedCommandIds(),
+    db.query.commands.findMany({
+      where: whereClause,
+      limit,
+      offset,
+      with: {
+        category: true,
+        tags: {
+          with: {
+            tag: true,
+          },
+        },
+        submittedBy: true,
+      },
+      orderBy: (table, { desc }) => [desc(table.createdAt)],
+    }),
+    db
+      .select({ count: sql<number>`count(*)` })
+      .from(commands)
+      .where(whereClause)
+      .then((res) => Number(res[0]?.count || 0)),
+    getBookmarkedCommandIds(profile?.id ?? null),
   ])
 
   const commandsWithBookmarks = results.map((command) => ({

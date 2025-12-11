@@ -22,6 +22,24 @@ type PageProps = {
   params: Promise<{ slug: string }>
 }
 
+function canUserViewCommand(
+  command: { status: string; submittedByUserId: string | null },
+  profile: { id: string; role: string } | null,
+): boolean {
+  const isApproved = command.status === 'approved'
+  if (isApproved) {
+    return true
+  }
+  if (!profile) {
+    return false
+  }
+  const isOwner = command.submittedByUserId === profile.id
+  if (isOwner) {
+    return true
+  }
+  return profile.role === 'admin'
+}
+
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
@@ -74,6 +92,7 @@ export default async function CommandDetailPage({ params }: PageProps) {
           tag: true,
         },
       },
+      submittedBy: true,
     },
   })
 
@@ -82,17 +101,7 @@ export default async function CommandDetailPage({ params }: PageProps) {
   }
 
   // Check visibility: approved OR (user is owner OR admin)
-  const isApproved = command.status === 'approved'
-
-  let canView = isApproved
-  if (!canView && profile) {
-    const isOwner = command.submittedByUserId === profile.id
-    if (isOwner) {
-      canView = true
-    } else {
-      canView = profile.role === 'admin'
-    }
-  }
+  const canView = canUserViewCommand(command, profile)
 
   if (!canView) {
     notFound()
@@ -113,6 +122,7 @@ export default async function CommandDetailPage({ params }: PageProps) {
               tag: true,
             },
           },
+          submittedBy: true,
         },
       })
     : []
@@ -207,6 +217,14 @@ export default async function CommandDetailPage({ params }: PageProps) {
 
           {/* Metadata */}
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
+            {!!commandWithBookmark.submittedBy?.username && (
+              <div className="flex items-center gap-2">
+                <span className="font-medium text-xs sm:text-sm">Author:</span>
+                <span className="text-muted-foreground text-xs sm:text-sm">
+                  {commandWithBookmark.submittedBy.username}
+                </span>
+              </div>
+            )}
             {commandWithBookmark.category && (
               <div className="flex items-center gap-2">
                 <span className="font-medium text-xs sm:text-sm">
