@@ -7,6 +7,11 @@ import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { addBookmark, deleteBookmark } from '@/app/actions/bookmarks'
 import { Button } from '@/components/ui/button'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import { logger } from '@/lib/logger'
 
 const HTTP_STATUS_CONFLICT = 409
@@ -95,7 +100,8 @@ export function BookmarkButton({
     }
   }
 
-  return (
+  const isIconOnly = !showText || size === 'icon'
+  const button = (
     <Button
       aria-label={isBookmarked ? 'Remove from favorites' : 'Add to favorites'}
       className={isBookmarked ? 'text-red-500 hover:text-red-600' : ''}
@@ -114,4 +120,17 @@ export function BookmarkButton({
       )}
     </Button>
   )
+
+  if (isIconOnly) {
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>{button}</TooltipTrigger>
+        <TooltipContent>
+          {isBookmarked ? 'Remove from favorites' : 'Add to favorites'}
+        </TooltipContent>
+      </Tooltip>
+    )
+  }
+
+  return button
 }

@@ -2,6 +2,11 @@
 
 import { ExternalLink } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import { generateCommandDeeplink } from '@/lib/utils'
 
 type OpenInCursorButtonProps = {
@@ -27,7 +32,8 @@ export function OpenInCursorButton({
     window.location.href = deeplink
   }
 
-  return (
+  const isIconOnly = !showText || size === 'icon'
+  const button = (
     <Button
       aria-label="Add to Cursor"
       onClick={handleOpenInCursor}
@@ -39,4 +45,15 @@ export function OpenInCursorButton({
       {showText && <span>Add to Cursor</span>}
     </Button>
   )
+
+  if (isIconOnly) {
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>{button}</TooltipTrigger>
+        <TooltipContent>Add to Cursor</TooltipContent>
+      </Tooltip>
+    )
+  }
+
+  return button
 }
