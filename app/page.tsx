@@ -25,7 +25,6 @@ export const metadata: Metadata = {
 }
 
 async function getFeaturedCategories() {
-  'use cache'
   return await db.query.categories.findMany({
     limit: 4,
   })
