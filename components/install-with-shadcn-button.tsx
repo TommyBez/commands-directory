@@ -38,37 +38,45 @@ export function InstallWithShadcnButton({
   }
 
   const isIconOnly = !showText || size === 'icon'
+  const iconSize = showText ? 'size-4' : 'size-5'
+  const tooltipText = copied ? 'Copied!' : 'Install with shadcn'
+  const ariaLabel = isIconOnly ? tooltipText : undefined
+
+  const buttonContent = copied ? (
+    <>
+      <CheckIcon aria-hidden="true" className={iconSize} />
+      {showText && <span className="ml-2">Copied!</span>}
+    </>
+  ) : (
+    <>
+      <Image
+        alt="shadcn/ui"
+        aria-hidden={isIconOnly ? 'true' : undefined}
+        className={iconSize}
+        height={20}
+        src="/shadcn-logo.png"
+        width={20}
+      />
+      {showText && <span className="ml-2">Install with shadcn</span>}
+    </>
+  )
+
   const button = (
-    <Button onClick={handleCopy} size={size} variant={variant}>
-      {copied ? (
-        <>
-          <CheckIcon className={showText ? 'size-4' : 'size-5'} />
-          {showText && <span className="ml-2">Copied!</span>}
-        </>
-      ) : (
-        <>
-          <Image
-            alt="shadcn/ui"
-            className={showText ? 'size-4' : 'size-5'}
-            height={20}
-            src="/shadcn-logo.png"
-            width={20}
-          />
-          {showText && <span className="ml-2">Install with shadcn</span>}
-        </>
-      )}
+    <Button
+      aria-label={ariaLabel}
+      onClick={handleCopy}
+      size={size}
+      variant={variant}
+    >
+      {buttonContent}
     </Button>
   )
 
   if (isIconOnly) {
     return (
       <Tooltip>
-        <TooltipTrigger asChild>
-          {button}
-        </TooltipTrigger>
-        <TooltipContent>
-          {copied ? 'Copied!' : 'Install with shadcn'}
-        </TooltipContent>
+        <TooltipTrigger asChild>{button}</TooltipTrigger>
+        <TooltipContent>{tooltipText}</TooltipContent>
       </Tooltip>
     )
   }

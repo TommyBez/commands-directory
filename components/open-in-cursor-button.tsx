@@ -49,9 +49,7 @@ export function OpenInCursorButton({
   if (isIconOnly) {
     return (
       <Tooltip>
-        <TooltipTrigger asChild>
-          {button}
-        </TooltipTrigger>
+        <TooltipTrigger asChild>{button}</TooltipTrigger>
         <TooltipContent>Add to Cursor</TooltipContent>
       </Tooltip>
     )

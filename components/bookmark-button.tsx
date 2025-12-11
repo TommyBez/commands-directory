@@ -124,9 +124,7 @@ export function BookmarkButton({
   if (isIconOnly) {
     return (
       <Tooltip>
-        <TooltipTrigger asChild>
-          {button}
-        </TooltipTrigger>
+        <TooltipTrigger asChild>{button}</TooltipTrigger>
         <TooltipContent>
           {isBookmarked ? 'Remove from favorites' : 'Add to favorites'}
         </TooltipContent>
