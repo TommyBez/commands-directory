@@ -1,17 +1,9 @@
-'use client'
-
-import { SignedIn } from '@clerk/nextjs'
+import { Suspense } from 'react'
 import {
-  FolderIcon,
-  HeartIcon,
-  HomeIcon,
-  PlusCircleIcon,
-  SearchIcon,
-  SendIcon,
-  ShieldIcon,
-} from 'lucide-react'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+  AdminSidebarGroup,
+  AdminSidebarGroupSkeleton,
+} from '@/components/admin-sidebar-group'
+import { SidebarMenuItemLink } from '@/components/sidebar-menu-item'
 import {
   Sidebar,
   SidebarContent,
@@ -19,59 +11,34 @@ import {
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
+  SidebarMenuSkeleton,
   SidebarRail,
 } from '@/components/ui/sidebar'
-import type { Category } from '@/db/schema/categories'
+import {
+  UserSidebarGroup,
+  UserSidebarGroupSkeleton,
+} from '@/components/user-sidebar-group'
+import { db } from '@/db'
 
-type AppSidebarProps = {
-  isAdmin?: boolean
-  categories?: Category[]
+async function getCategories() {
+  return await db.query.categories.findMany({
+    orderBy: (categoryTable, { asc }) => [asc(categoryTable.name)],
+  })
 }
 
-export function AppSidebar({
-  isAdmin = false,
-  categories = [],
-}: AppSidebarProps) {
-  const pathname = usePathname()
+export async function AppSidebar() {
+  const categories = await getCategories()
 
   const mainNavItems = [
     {
       title: 'Home',
       url: '/',
-      icon: HomeIcon,
+      icon: 'home' as const,
     },
     {
       title: 'Browse Commands',
       url: '/commands',
-      icon: SearchIcon,
-    },
-  ]
-
-  const userNavItems = [
-    {
-      title: 'Favorites',
-      url: '/favorites',
-      icon: HeartIcon,
-    },
-    {
-      title: 'Submit Command',
-      url: '/commands/new',
-      icon: PlusCircleIcon,
-    },
-    {
-      title: 'My Submissions',
-      url: '/submissions',
-      icon: SendIcon,
-    },
-  ]
-
-  const adminNavItems = [
-    {
-      title: 'Admin Panel',
-      url: '/admin/commands',
-      icon: ShieldIcon,
+      icon: 'search' as const,
     },
   ]
 
@@ -83,18 +50,17 @@ export function AppSidebar({
           <SidebarGroupContent>
             <SidebarMenu>
               {mainNavItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={pathname === item.url}
-                    tooltip={item.title}
-                  >
-                    <Link href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+                <Suspense
+                  fallback={<SidebarMenuSkeleton showIcon />}
+                  key={item.title}
+                >
+                  <SidebarMenuItemLink
+                    icon={item.icon}
+                    key={item.title}
+                    title={item.title}
+                    url={item.url}
+                  />
+                </Suspense>
               ))}
             </SidebarMenu>
           </SidebarGroupContent>
@@ -109,18 +75,18 @@ export function AppSidebar({
                 {categories.map((category) => {
                   const categoryUrl = `/commands?category=${category.slug}`
                   return (
-                    <SidebarMenuItem key={category.id}>
-                      <SidebarMenuButton
-                        asChild
-                        isActive={pathname === categoryUrl}
+                    <Suspense
+                      fallback={<SidebarMenuSkeleton showIcon />}
+                      key={category.id}
+                    >
+                      <SidebarMenuItemLink
+                        icon="folder"
+                        key={category.id}
+                        title={category.name}
                         tooltip={category.description ?? category.name}
-                      >
-                        <Link href={categoryUrl}>
-                          <FolderIcon />
-                          <span>{category.name}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
+                        url={categoryUrl}
+                      />
+                    </Suspense>
                   )
                 })}
               </SidebarMenu>
@@ -129,54 +95,14 @@ export function AppSidebar({
         )}
 
         {/* User Navigation - Only show when signed in */}
-        <SignedIn>
-          <SidebarGroup>
-            <SidebarGroupLabel>Your Content</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {userNavItems.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={pathname === item.url}
-                      tooltip={item.title}
-                    >
-                      <Link href={item.url}>
-                        <item.icon />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </SignedIn>
+        <Suspense fallback={<UserSidebarGroupSkeleton />}>
+          <UserSidebarGroup />
+        </Suspense>
 
         {/* Admin Navigation - Only show for admins */}
-        {isAdmin && (
-          <SidebarGroup>
-            <SidebarGroupLabel>Admin</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {adminNavItems.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={pathname === item.url}
-                      tooltip={item.title}
-                    >
-                      <Link href={item.url}>
-                        <item.icon />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
+        <Suspense fallback={<AdminSidebarGroupSkeleton />}>
+          <AdminSidebarGroup />
+        </Suspense>
       </SidebarContent>
 
       <SidebarRail />

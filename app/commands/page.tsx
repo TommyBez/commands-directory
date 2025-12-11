@@ -2,6 +2,7 @@ import { auth } from '@clerk/nextjs/server'
 import { and, eq, ilike, inArray, or, type SQL, sql } from 'drizzle-orm'
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import type { SearchParams } from 'nuqs/server'
 import { CommandCard } from '@/components/command-card'
 import { CommandFilters } from '@/components/command-filters'
 import { CommandsSearchInput } from '@/components/commands-search-input'
@@ -26,7 +27,7 @@ export const metadata: Metadata = {
 }
 
 type PageProps = {
-  searchParams: Promise<Record<string, string | string[] | undefined>>
+  searchParams: Promise<SearchParams>
 }
 
 async function buildWhereConditions(params: {

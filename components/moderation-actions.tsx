@@ -2,6 +2,11 @@
 
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import {
+  approveCommand,
+  deleteCommand,
+  rejectCommand,
+} from '@/app/actions/commands'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -39,13 +44,10 @@ export function ModerationActions({
     setError(null)
 
     try {
-      const response = await fetch(`/api/admin/commands/${commandId}/approve`, {
-        method: 'PATCH',
-      })
+      const result = await approveCommand(commandId)
 
-      if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.error || 'Failed to approve command')
+      if (!result.ok) {
+        throw new Error(result.error || 'Failed to approve command')
       }
 
       router.refresh()
@@ -62,19 +64,13 @@ export function ModerationActions({
     setError(null)
 
     try {
-      const response = await fetch(`/api/admin/commands/${commandId}/reject`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          reason: rejectionReason.trim() || null,
-        }),
-      })
+      const result = await rejectCommand(
+        commandId,
+        rejectionReason.trim() || null,
+      )
 
-      if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.error || 'Failed to reject command')
+      if (!result.ok) {
+        throw new Error(result.error || 'Failed to reject command')
       }
 
       setRejectDialogOpen(false)
@@ -93,13 +89,10 @@ export function ModerationActions({
     setError(null)
 
     try {
-      const response = await fetch(`/api/admin/commands/${commandId}`, {
-        method: 'DELETE',
-      })
+      const result = await deleteCommand(commandId)
 
-      if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.error || 'Failed to delete command')
+      if (!result.ok) {
+        throw new Error(result.error || 'Failed to delete command')
       }
 
       setDeleteDialogOpen(false)

@@ -7,6 +7,7 @@ import { BookmarkButton } from '@/components/bookmark-button'
 import { CommandCard } from '@/components/command-card'
 import { CopyCommandButton } from '@/components/copy-command-button'
 import { InstallWithShadcnButton } from '@/components/install-with-shadcn-button'
+import { OpenInCursorButton } from '@/components/open-in-cursor-button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
@@ -19,6 +20,24 @@ const MAX_RELATED_COMMANDS = 4
 
 type PageProps = {
   params: Promise<{ slug: string }>
+}
+
+function canUserViewCommand(
+  command: { status: string; submittedByUserId: string | null },
+  profile: { id: string; role: string } | null,
+): boolean {
+  const isApproved = command.status === 'approved'
+  if (isApproved) {
+    return true
+  }
+  if (!profile) {
+    return false
+  }
+  const isOwner = command.submittedByUserId === profile.id
+  if (isOwner) {
+    return true
+  }
+  return profile.role === 'admin'
 }
 
 export async function generateMetadata({
@@ -82,17 +101,7 @@ export default async function CommandDetailPage({ params }: PageProps) {
   }
 
   // Check visibility: approved OR (user is owner OR admin)
-  const isApproved = command.status === 'approved'
-
-  let canView = isApproved
-  if (!canView && profile) {
-    const isOwner = command.submittedByUserId === profile.id
-    if (isOwner) {
-      canView = true
-    } else {
-      canView = profile.role === 'admin'
-    }
-  }
+  const canView = canUserViewCommand(command, profile)
 
   if (!canView) {
     notFound()
@@ -173,6 +182,13 @@ export default async function CommandDetailPage({ params }: PageProps) {
               <BookmarkButton
                 commandId={commandWithBookmark.id}
                 initialBookmarked={commandWithBookmark.isBookmarked}
+                showText={true}
+                size="lg"
+                variant="outline"
+              />
+              <OpenInCursorButton
+                commandContent={commandWithBookmark.content}
+                commandName={commandWithBookmark.slug}
                 showText={true}
                 size="lg"
                 variant="outline"
